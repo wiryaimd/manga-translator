@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primary2">
+
+    <TextView
+        android:textColor="@color/color5"
+        android:layout_marginTop="12dp"
+        android:id="@+id/select_title"
+        android:text="Select Your Type File"
+        android:fontFamily="@font/sfleague"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </TextView>
+
+    <LinearLayout
+        android:layout_below="@id/select_title"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/select_image"
+            android:layout_weight="1"
+            android:src="@drawable/ic_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp">
+
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/select_pdf"
+            android:layout_weight="1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_pdf">
+
+        </ImageView>
+
+
+    </LinearLayout>
+
+</RelativeLayout>
