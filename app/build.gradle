@@ -48,9 +48,6 @@ dependencies {
     // translate
     implementation 'com.google.mlkit:translate:16.1.2'
 
-    // pdf reader
-    implementation 'org.apache.pdfbox:pdfbox:1.8.16'
-
     implementation 'com.github.bumptech.glide:glide:4.12.0'
 
 }
