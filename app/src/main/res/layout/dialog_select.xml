@@ -1,49 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/primary2">
+    android:layout_height="wrap_content">
 
     <TextView
-        android:textColor="@color/color5"
-        android:layout_marginTop="12dp"
         android:id="@+id/select_title"
-        android:text="Select Your Type File"
-        android:fontFamily="@font/sfleague"
-        android:textSize="20sp"
-        android:textAlignment="center"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:fontFamily="@font/sfbold"
+        android:text="Select type file"
+        android:textAlignment="center"
+        android:textColor="@color/primary"
+        android:textSize="20sp">
 
     </TextView>
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/select_title"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="12dp"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_marginBottom="12dp">
 
-        <ImageView
-            android:id="@+id/select_image"
+        <LinearLayout
+            android:id="@+id/select_linear_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
             android:layout_weight="1"
-            android:src="@drawable/ic_image"
-            android:layout_width="80dp"
-            android:layout_height="80dp">
+            android:background="@drawable/ripple_1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="4dp">
 
-        </ImageView>
+            <ImageView
+                android:id="@+id/select_image"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_image">
 
-        <ImageView
-            android:id="@+id/select_pdf"
+            </ImageView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sfbold"
+                android:text="Image"
+                android:textColor="@color/primary"
+                android:textSize="18sp">
+
+            </TextView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/select_linear_pdf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
             android:layout_weight="1"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/ic_pdf">
+            android:background="@drawable/ripple_1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="4dp">
 
-        </ImageView>
+            <ImageView
+                android:id="@+id/select_pdf"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_pdf">
 
+            </ImageView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sfbold"
+                android:text="PDF File"
+                android:textColor="@color/primary"
+                android:textSize="18sp">
+
+            </TextView>
+
+        </LinearLayout>
 
     </LinearLayout>
 

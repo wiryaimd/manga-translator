@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color7">
+
+    <ScrollView
+        android:nestedScrollingEnabled="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/setuplang_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:clipToPadding="false"
+                android:overScrollMode="never">
+
+            </androidx.viewpager.widget.ViewPager>
+
+            <LinearLayout
+                android:id="@+id/setuplang_lineartranslate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/setuplang_viewpager"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="12dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/custom_1"
+                    android:orientation="vertical"
+                    android:padding="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="6dp"
+                        android:fontFamily="@font/sfbold"
+                        android:text="Translate From"
+                        android:textSize="14sp">
+
+                    </TextView>
+
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp">
+
+                    </Spinner>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/custom_1"
+                    android:orientation="vertical"
+                    android:padding="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="6dp"
+                        android:fontFamily="@font/sfbold"
+                        android:text="Translate To"
+                        android:textSize="14sp">
+
+                    </TextView>
+
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp">
+
+                    </Spinner>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/setuplang_loadingdownload"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignTop="@id/setuplang_downloadlanguages"
+                android:layout_margin="12dp"
+                android:layout_toStartOf="@id/setuplang_downloadlanguages"
+                android:visibility="gone">
+
+            </ProgressBar>
+
+            <ImageView
+                android:layout_alignTop="@id/setuplang_downloadlanguages"
+                android:layout_margin="12dp"
+                android:src="@drawable/ic_alert"
+                android:layout_toStartOf="@id/setuplang_downloadlanguages"
+                android:layout_width="30dp"
+                android:layout_height="30dp">
+
+            </ImageView>
+
+            <Button
+                android:id="@+id/setuplang_downloadlanguages"
+                android:layout_width="180dp"
+                android:layout_height="50dp"
+                android:layout_below="@id/setuplang_lineartranslate"
+                android:layout_alignParentEnd="true"
+                android:fontFamily="@font/sfreguler"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="12dp"
+                android:backgroundTint="@color/primary5"
+                android:text="Required Download Language"
+                android:textSize="12sp">
+
+            </Button>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/setuplang_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:nestedScrollingEnabled="true"
+                android:layout_below="@id/setuplang_downloadlanguages">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/setuplang_processtranslate"
+        android:text="Process Translate"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="32dp"
+        android:letterSpacing="0.2"
+        android:layout_marginEnd="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="55dp">
+
+    </Button>
+
+</RelativeLayout>

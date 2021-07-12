@@ -1,10 +1,12 @@
 package com.wiryaimd.mangatranslator.ui.main.fragment.dialog;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +22,7 @@ public class SelectDialog extends DialogFragment {
 
     private MainViewModel mainViewModel;
 
-    private ImageView selectImg, selectPdf;
+    private LinearLayout selectImg, selectPdf;
 
     @Nullable
     @org.jetbrains.annotations.Nullable
@@ -29,6 +31,7 @@ public class SelectDialog extends DialogFragment {
         if (getDialog() != null){
             getDialog().requestWindowFeature(STYLE_NO_TITLE);
             getDialog().getWindow().setDimAmount(0);
+            getDialog().getWindow().setGravity(Gravity.BOTTOM);
         }
         return inflater.inflate(R.layout.dialog_select, container, false);
     }
@@ -38,13 +41,14 @@ public class SelectDialog extends DialogFragment {
 
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        selectImg = view.findViewById(R.id.select_image);
-        selectPdf = view.findViewById(R.id.select_pdf);
+        selectImg = view.findViewById(R.id.select_linear_image);
+        selectPdf = view.findViewById(R.id.select_linear_pdf);
 
         selectImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mainViewModel.getOpenFile().openImage();
+                if (getDialog() != null) getDialog().dismiss();
             }
         });
 
@@ -52,6 +56,7 @@ public class SelectDialog extends DialogFragment {
             @Override
             public void onClick(View view) {
                 mainViewModel.getOpenFile().openPdf();
+                if (getDialog() != null) getDialog().dismiss();
             }
         });
 
