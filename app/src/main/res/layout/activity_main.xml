@@ -7,24 +7,7 @@
     android:background="@color/white"
     tools:context=".ui.main.MainActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/main_appbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="12dp">
-
-        <androidx.appcompat.widget.Toolbar
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_menu"
-            app:subtitle="First release version 1.0"
-            app:subtitleTextColor="@color/color6"
-            app:title="Manga Translator"
-            app:titleTextColor="@color/white">
-
-        </androidx.appcompat.widget.Toolbar>
-
-    </com.google.android.material.appbar.AppBarLayout>
+    <include layout="@layout/toolbar_main"/>
 
     <FrameLayout
         android:layout_below="@id/main_appbar"

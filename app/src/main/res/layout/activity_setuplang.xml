@@ -5,7 +5,10 @@
     android:layout_height="match_parent"
     android:background="@color/color7">
 
+    <include layout="@layout/toolbar_main"/>
+
     <ScrollView
+        android:layout_below="@id/main_appbar"
         android:nestedScrollingEnabled="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -53,6 +56,7 @@
                     </TextView>
 
                     <Spinner
+                        android:id="@+id/setuplang_spinfrom"
                         android:layout_width="match_parent"
                         android:layout_height="50dp">
 
@@ -80,6 +84,7 @@
                     </TextView>
 
                     <Spinner
+                        android:id="@+id/setuplang_spinto"
                         android:layout_width="match_parent"
                         android:layout_height="50dp">
 
@@ -101,6 +106,8 @@
             </ProgressBar>
 
             <ImageView
+                android:id="@+id/setuplang_imgalert"
+                android:visibility="gone"
                 android:layout_alignTop="@id/setuplang_downloadlanguages"
                 android:layout_margin="12dp"
                 android:src="@drawable/ic_alert"
@@ -111,6 +118,7 @@
             </ImageView>
 
             <Button
+                android:visibility="gone"
                 android:id="@+id/setuplang_downloadlanguages"
                 android:layout_width="180dp"
                 android:layout_height="50dp"
@@ -120,7 +128,7 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginEnd="12dp"
                 android:backgroundTint="@color/primary5"
-                android:text="Required Download Language"
+                android:text="Download Language Required"
                 android:textSize="12sp">
 
             </Button>

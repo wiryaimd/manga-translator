@@ -1,4 +1,4 @@
-package com.wiryaimd.mangatranslator.ui.main.fragment.adapter;
+package com.wiryaimd.mangatranslator.ui.setup.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;

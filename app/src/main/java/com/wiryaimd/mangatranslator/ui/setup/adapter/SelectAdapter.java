@@ -1,4 +1,4 @@
-package com.wiryaimd.mangatranslator.ui.main.fragment.adapter;
+package com.wiryaimd.mangatranslator.ui.setup.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +19,11 @@ import java.util.List;
 
 public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.MyHolder> {
 
-    private List<SelectedModel> selectedList;
+    private List<SelectedModel> selectedList = new ArrayList<>();
 
-    public SelectAdapter(List<SelectedModel> selectedList) {
+    public void setSelectedList(List<SelectedModel> selectedList){
         this.selectedList = selectedList;
+        notifyDataSetChanged();
     }
 
     @NonNull

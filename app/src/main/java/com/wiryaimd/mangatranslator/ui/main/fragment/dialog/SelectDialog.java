@@ -5,7 +5,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -14,7 +13,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.wiryaimd.mangatranslator.R;
-import com.wiryaimd.mangatranslator.ui.main.MainViewModel;
+import com.wiryaimd.mangatranslator.ui.MainViewModel;
 
 import org.jetbrains.annotations.NotNull;
 
