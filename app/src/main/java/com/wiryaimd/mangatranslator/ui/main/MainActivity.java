@@ -61,30 +61,16 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<String> launcherPdf = registerForActivityResult(new ActivityResultContracts.GetContent(), new ActivityResultCallback<Uri>() {
         @Override
         public void onActivityResult(Uri result) {
-            List<Bitmap> bitmapList = new ArrayList<>();
-            try {
-                File file = RealPath.from(MainActivity.this, result);
-                PdfRenderer pdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY));
-                Bitmap bitmap;
-                Log.d(TAG, "onActivityResult: count: " + pdfRenderer.getPageCount());
-                for (int i = 0; i < pdfRenderer.getPageCount(); i++) {
-                    PdfRenderer.Page page = pdfRenderer.openPage(i);
-                    int width = getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
-                    int height = getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
-                    bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-//                    Canvas canvas = new Canvas(bitmap);
-//                    canvas.drawColor(Color.WHITE);
-//                    canvas.drawBitmap(bitmap, 0, 0, null);
-//                    Rect r = new Rect(0, 0, width, height);
-//                    page.render(bitmap, r, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-//                    bitmapList.add(bitmap);
-                    page.close();
-                }
-                pdfRenderer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-//            Glide.with(MainActivity.this).load(bitmapList.get(3)).into(demoimg);
+            ArrayList<SelectedModel> selectedList = new ArrayList<>();
+
+            Cursor cursor = getContentResolver().query(result, null, null, null, null);
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            cursor.moveToFirst();
+            selectedList.add(new SelectedModel(cursor.getColumnName(nameIndex), result, SelectedModel.Type.PDF));
+
+            Intent intent = new Intent(MainActivity.this, SetupActivity.class);
+            intent.putExtra(Const.SELECTED_LIST, selectedList);
+            startActivity(intent);
             Log.d(TAG, "onActivityResult: asuuuu");
         }
     });

@@ -7,10 +7,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.text.TextPaint;
 import android.util.Log;
@@ -41,8 +44,10 @@ import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.TextRecognizerOptions;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
+import com.wiryaimd.mangatranslator.ui.setup.SetupActivity;
 import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
+import com.wiryaimd.mangatranslator.util.RealPath;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -67,6 +72,7 @@ public class ProcessDialog extends DialogFragment {
     private ProgressBar loading;
 
     private List<SelectedModel> selectedList;
+    private List<Bitmap> bitmapList;
     private int flagFrom, flagTo;
 
     private Translator translator;
@@ -132,8 +138,42 @@ public class ProcessDialog extends DialogFragment {
         if (selectedList.size() == 0){
             return;
         }
-        tvinfo.setText(("Processing image " + countTranslate + "/" + selectedList.size()));
+
+        if (selectedList.get(0).getType() == SelectedModel.Type.PDF) {
+            bitmapList = loadBitmapList();
+            tvinfo.setText(("Processing image " + countTranslate + "/" + bitmapList.size()));
+        }else{
+            tvinfo.setText(("Processing image " + countTranslate + "/" + selectedList.size()));
+        }
         detectText();
+    }
+
+    public List<Bitmap> loadBitmapList(){
+        List<Bitmap> bitmapList = new ArrayList<>();
+        try {
+            File file = RealPath.from(setupViewModel.getApplication(), selectedList.get(0).getUri());
+            PdfRenderer pdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY));
+            Bitmap bitmap;
+            Log.d(TAG, "onActivityResult: count: " + pdfRenderer.getPageCount());
+            for (int i = 0; i < pdfRenderer.getPageCount(); i++) {
+                PdfRenderer.Page page = pdfRenderer.openPage(i);
+                int width = getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
+                int height = getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
+                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                canvas.drawColor(Color.WHITE);
+                canvas.drawBitmap(bitmap, 0, 0, null);
+                Rect r = new Rect(0, 0, width, height);
+                page.render(bitmap, r, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                bitmapList.add(bitmap);
+                page.close();
+            }
+            pdfRenderer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "loadBitmapList: uwu crot");
+        return bitmapList;
     }
 
     public static Bitmap getBitmap(ContentResolver cr, Uri url) throws FileNotFoundException, IOException {
@@ -147,13 +187,16 @@ public class ProcessDialog extends DialogFragment {
 
     public void detectText(){
         try {
-//            Bitmap rawbitmap = MediaStore.Images.Media.getBitmap(setupViewModel.getApplication().getContentResolver(), selectedList.get(countTranslate).getUri());
-//            Log.d(TAG, "detectText: widht: " + rawbitmap.getWidth() + " height: " + rawbitmap.getHeight());
-            bitmap = getBitmap(setupViewModel.getApplication().getContentResolver(), selectedList.get(countTranslate).getUri());
-            Log.d(TAG, "detectText: w: " + bitmap.getWidth());
-            Log.d(TAG, "detectText: h: " + bitmap.getHeight());
-//            rawbitmap.recycle();
-
+            if (selectedList.get(0).getType() == SelectedModel.Type.IMAGE) {
+                bitmap = getBitmap(setupViewModel.getApplication().getContentResolver(), selectedList.get(countTranslate).getUri());
+            }else{
+                if (countTranslate < 3){
+                    countTranslate += 1;
+                    detectText();
+                    return;
+                }
+                bitmap = bitmapList.get(countTranslate);
+            }
             canvas = new Canvas(bitmap);
 
             InputImage inputImage = InputImage.fromBitmap(bitmap, 0);
@@ -182,6 +225,9 @@ public class ProcessDialog extends DialogFragment {
     public void processText(Iterator<Text.TextBlock> block){
         Text.TextBlock textBlock = block.next();
 
+        String result = textBlock.getText().replaceAll("\\n", " ").replaceAll("\\.", " ");
+        Log.d(TAG, "processText: text block: " + result);
+
         if (textBlock.getBoundingBox() == null){
             if (block.hasNext()) {
                 processText(block);
@@ -191,7 +237,6 @@ public class ProcessDialog extends DialogFragment {
             return;
         }
 
-        Log.d(TAG, "processText: process: " + textBlock.getText());
         avgWidth = 0; avgHeight = 0; int countSize = 0;
         for (Text.Line line : textBlock.getLines()){
             if (line.getBoundingBox() != null){
@@ -217,7 +262,7 @@ public class ProcessDialog extends DialogFragment {
         Log.d(TAG, "processText: avgHeight: " + avgHeight);
         Log.d(TAG, "processText: textLength: " + textLength);
 
-        translator.translate(textBlock.getText()).addOnSuccessListener(new OnSuccessListener<String>() {
+        translator.translate(result.toLowerCase()).addOnSuccessListener(new OnSuccessListener<String>() {
             @Override
             public void onSuccess(@NonNull @NotNull String s) {
                 StringBuilder sb = new StringBuilder();
@@ -268,7 +313,12 @@ public class ProcessDialog extends DialogFragment {
     public void saveBitmap(){
         File dir = new File(Environment.getExternalStorageDirectory().toString());
         dir.mkdirs();
-        String filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+        String filename;
+        if (bitmapList.size() != 0) {
+            filename = "mngTranslator-" + selectedList.get(0).getName() + " (" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+        }else{
+            filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+        }
         File file = new File(dir, filename);
         if (file.exists()){
             file.delete();
@@ -289,13 +339,22 @@ public class ProcessDialog extends DialogFragment {
     }
     
     public void updateData(){
-        tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         countTranslate += 1;
-        
-        if (countTranslate < selectedList.size()){
-            detectText();
-        }else{
-            getDialog().dismiss();
+
+        if (bitmapList.size() != 0){
+            if (countTranslate < bitmapList.size()){
+                detectText();
+            }else{
+                if (getDialog() != null) getDialog().dismiss();
+            }
+            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
+        }else {
+            if (countTranslate < selectedList.size()) {
+                detectText();
+            } else {
+                if (getDialog() != null) getDialog().dismiss();
+            }
+            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
     }
 

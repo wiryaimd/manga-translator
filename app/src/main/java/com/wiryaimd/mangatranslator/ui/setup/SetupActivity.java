@@ -1,6 +1,12 @@
 package com.wiryaimd.mangatranslator.ui.setup;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.pdf.PdfRenderer;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -28,6 +34,7 @@ import com.google.mlkit.nl.translate.Translator;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.model.InfoModel;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
+import com.wiryaimd.mangatranslator.ui.main.MainActivity;
 import com.wiryaimd.mangatranslator.ui.main.MainViewModel;
 import com.wiryaimd.mangatranslator.ui.setup.adapter.InfoAdapter;
 import com.wiryaimd.mangatranslator.ui.setup.adapter.SelectAdapter;
@@ -35,9 +42,12 @@ import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.InfoDialog;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.ProcessDialog;
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
+import com.wiryaimd.mangatranslator.util.RealPath;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -58,6 +68,7 @@ public class SetupActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private ArrayList<SelectedModel> selectedList = new ArrayList<>();
+    private List<Bitmap> bitmapList = new ArrayList<>();
     private List<String> downloadedList = new ArrayList<>();
 
     private TranslateRemoteModel translateRemoteModel;
