@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.appbar.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_appbar"
+    android:id="@+id/setuplang_appbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="12dp">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/main_toolbar"
-        app:navigationIcon="@drawable/ic_menu"
+        android:id="@+id/setuplang_toolbar"
+        app:navigationIcon="@drawable/ic_back"
         app:subtitle="First release version 1.0"
         app:subtitleTextColor="@color/color6"
         app:title="Manga Translator"

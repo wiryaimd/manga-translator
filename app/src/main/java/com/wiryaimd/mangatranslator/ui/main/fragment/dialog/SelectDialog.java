@@ -13,7 +13,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.wiryaimd.mangatranslator.R;
-import com.wiryaimd.mangatranslator.ui.MainViewModel;
+import com.wiryaimd.mangatranslator.ui.main.MainViewModel;
 
 import org.jetbrains.annotations.NotNull;
 

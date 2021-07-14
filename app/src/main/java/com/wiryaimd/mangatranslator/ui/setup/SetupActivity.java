@@ -8,10 +8,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,14 +21,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.common.model.DownloadConditions;
 import com.google.mlkit.common.model.RemoteModelManager;
 import com.google.mlkit.nl.translate.TranslateRemoteModel;
+import com.google.mlkit.nl.translate.Translator;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.model.InfoModel;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
-import com.wiryaimd.mangatranslator.ui.MainViewModel;
+import com.wiryaimd.mangatranslator.ui.main.MainViewModel;
 import com.wiryaimd.mangatranslator.ui.setup.adapter.InfoAdapter;
 import com.wiryaimd.mangatranslator.ui.setup.adapter.SelectAdapter;
+import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.InfoDialog;
+import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.ProcessDialog;
+import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
 
 import org.jetbrains.annotations.NotNull;
@@ -39,9 +46,10 @@ public class SetupActivity extends AppCompatActivity {
 
     private static final String TAG = "SetupActivity";
 
-    private MainViewModel mainViewModel;
+    private SetupViewModel setupViewModel;
 
-    private Button btnrequire;
+    private Toolbar toolbar;
+    private Button btnrequire, btnprocess;
     private ImageView imgalert;
 
     private Spinner spinFrom, spinTo;
@@ -49,10 +57,14 @@ public class SetupActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private RecyclerView recyclerView;
 
-    private List<SelectedModel> selectedList = new ArrayList<>();
+    private ArrayList<SelectedModel> selectedList = new ArrayList<>();
     private List<String> downloadedList = new ArrayList<>();
 
+    private TranslateRemoteModel translateRemoteModel;
     private RemoteModelManager remoteModelManager;
+    private DownloadConditions downloadConditions;
+
+    private int flagFrom = 0, flagTo = 0;
 
     @Override
     protected void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -61,15 +73,28 @@ public class SetupActivity extends AppCompatActivity {
 
         remoteModelManager = RemoteModelManager.getInstance();
 
+        toolbar = findViewById(R.id.setuplang_toolbar);
+        setSupportActionBar(toolbar);
+
         btnrequire = findViewById(R.id.setuplang_downloadlanguages);
+        btnprocess = findViewById(R.id.setuplang_processtranslate);
         imgalert = findViewById(R.id.setuplang_imgalert);
         spinFrom = findViewById(R.id.setuplang_spinfrom);
         spinTo = findViewById(R.id.setuplang_spinto);
         recyclerView = findViewById(R.id.setuplang_recyclerview);
         viewPager = findViewById(R.id.setuplang_viewpager);
 
-        // oke ternyatod data yang tersimpan pada viewmodel berbeda ya tod tiap activity nya tod kentod
-        mainViewModel = new ViewModelProvider(SetupActivity.this).get(MainViewModel.class);
+        // // oke ternyatod data yang tersimpan pada viewmodel berbeda ya tod tiap activity nya tod kentod
+
+        setupViewModel = new ViewModelProvider(SetupActivity.this).get(SetupViewModel.class);
+
+        if (getIntent() != null){
+            selectedList = getIntent().getParcelableArrayListExtra(Const.SELECTED_LIST);
+            setupViewModel.getSelectedModelLiveData().setValue(selectedList);
+        }else{
+            Toast.makeText(SetupActivity.this, "Cannot load data, please try again", Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         List<InfoModel> infoList = new ArrayList<>();
         infoList.add(new InfoModel("For non-latin languages", "Currently, for non-latin comic language need to select the text manually, if you want automatic translate you can translate the latin comic e.g Manga in english, france etc"));
@@ -80,56 +105,50 @@ public class SetupActivity extends AppCompatActivity {
         viewPager.setPadding(24, 0, 160, 0);
 
         SelectAdapter selectAdapter = new SelectAdapter();
-        recyclerView.setLayoutManager(new LinearLayoutManager(mainViewModel.getApplication()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(setupViewModel.getApplication()));
         recyclerView.setAdapter(selectAdapter);
+        selectAdapter.setSelectedList(selectedList);
 
         ArrayAdapter<String> spinnerFromAdapter = new ArrayAdapter<>(SetupActivity.this, R.layout.item_spinner, R.id.spinner_language, LanguagesData.flag_from);
         spinFrom.setAdapter(spinnerFromAdapter);
         ArrayAdapter<String> spinnerToAdapter = new ArrayAdapter<>(SetupActivity.this, R.layout.item_spinner, R.id.spinner_language, LanguagesData.flag_to);
         spinTo.setAdapter(spinnerToAdapter);
 
-        mainViewModel.getSelectedModelLiveData().observe(SetupActivity.this, new Observer<List<SelectedModel>>() {
+        remoteModelManager = RemoteModelManager.getInstance();
+        downloadConditions = new DownloadConditions.Builder().build();
+
+        remoteModelManager.getDownloadedModels(TranslateRemoteModel.class).addOnSuccessListener(new OnSuccessListener<Set<TranslateRemoteModel>>() {
             @Override
-            public void onChanged(List<SelectedModel> selectedModels) {
-                Log.d(TAG, "onChanged: observer selected");
-                selectAdapter.setSelectedList(selectedList);
+            public void onSuccess(@NonNull @NotNull Set<TranslateRemoteModel> translateRemoteModels) {
+                for (TranslateRemoteModel model : translateRemoteModels){
+                    downloadedList.add(model.getLanguage());
+                    Log.d(TAG, "onSuccess: lang: " + model.getLanguage());
+                }
             }
         });
 
-        mainViewModel.getDownloadedModelsLiveData().observe(SetupActivity.this, new Observer<List<String>>() {
-            @Override
-            public void onChanged(List<String> strings) {
-                Log.d(TAG, "onChanged: observe downloaded models");
-                downloadedList = strings;
-            }
-        });
-
-        mainViewModel.getFlagFromLiveData().observe(SetupActivity.this, new Observer<Integer>() {
+        setupViewModel.getFlagFromLiveData().observe(SetupActivity.this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                Log.d(TAG, "onChanged: observe flag from");
                 checkRequireDownload(integer, 0);
                 if (!downloadedFrom || !downloadedTo){
                     btnrequire.setVisibility(View.VISIBLE);
                     imgalert.setVisibility(View.VISIBLE);
                 }else{
-                    Log.d(TAG, "onChanged: crot");
                     btnrequire.setVisibility(View.GONE);
                     imgalert.setVisibility(View.GONE);
                 }
             }
         });
 
-        mainViewModel.getFlagToLiveData().observe(SetupActivity.this, new Observer<Integer>() {
+        setupViewModel.getFlagToLiveData().observe(SetupActivity.this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                Log.d(TAG, "onChanged: observe flag to");
                 checkRequireDownload(integer, 1);
                 if (!downloadedFrom || !downloadedTo){
                     btnrequire.setVisibility(View.VISIBLE);
                     imgalert.setVisibility(View.VISIBLE);
                 }else{
-                    Log.d(TAG, "onChanged: crot");
                     btnrequire.setVisibility(View.GONE);
                     imgalert.setVisibility(View.GONE);
                 }
@@ -139,7 +158,8 @@ public class SetupActivity extends AppCompatActivity {
         spinFrom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                mainViewModel.getFlagFromLiveData().setValue(i);
+                setupViewModel.getFlagFromLiveData().setValue(i);
+                flagFrom = i;
             }
 
             @Override
@@ -151,12 +171,85 @@ public class SetupActivity extends AppCompatActivity {
         spinTo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                mainViewModel.getFlagToLiveData().setValue(i);
+                setupViewModel.getFlagToLiveData().setValue(i);
+                flagTo = i;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
 
+            }
+        });
+
+        btnprocess.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (setupViewModel.getFlagFromLiveData().getValue() == null ||
+                        setupViewModel.getFlagToLiveData().getValue() == null ||
+                        setupViewModel.getFlagFromLiveData().getValue() == 0 ||
+                        setupViewModel.getFlagToLiveData().getValue() == 0){
+                    Toast.makeText(SetupActivity.this, "Please select languages", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (downloadedFrom && downloadedTo){
+                    new ProcessDialog().show(getSupportFragmentManager(), "PROCESS_FRAGMENT_SETUP");
+                }else {
+                    new InfoDialog("Download Language Required", "You will download required language before start translating", false);
+                }
+            }
+        });
+
+        btnrequire.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (flagTo == 0 && flagFrom == 0){
+                    return;
+                }
+
+                if (flagFrom == flagTo && !downloadedFrom){
+                    translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_from[flagFrom]).build();
+                    remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(@NonNull @NotNull Void unused) {
+
+                        }
+                    });
+                    return;
+                }
+
+                if (!downloadedFrom && !downloadedTo){
+                    translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_from[flagFrom]).build();
+                    remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(@NonNull @NotNull Void unused) {
+
+                        }
+                    });
+                    translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_to[flagTo]).build();
+                    remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(@NonNull @NotNull Void unused) {
+
+                        }
+                    });
+                }else if(!downloadedFrom && flagFrom != 0){
+                    translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_from[flagFrom]).build();
+                    remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(@NonNull @NotNull Void unused) {
+
+                        }
+                    });
+                }else if(!downloadedTo && flagTo != 0){
+                    translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_to[flagTo]).build();
+                    remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(@NonNull @NotNull Void unused) {
+
+                        }
+                    });
+                }
             }
         });
     }
@@ -165,7 +258,7 @@ public class SetupActivity extends AppCompatActivity {
     private boolean downloadedTo = true;
 
     public void checkRequireDownload(int pos, int type){
-        Log.d(TAG, "checkRequireDownload: pos " + pos);
+
         if (pos == 0 && type == 0){
             downloadedFrom = true;
             return;
@@ -180,10 +273,8 @@ public class SetupActivity extends AppCompatActivity {
         } else{
             data = LanguagesData.flag_code[pos];
         }
-        Log.d(TAG, "checkRequireDownload: need: " + data);
-        Log.d(TAG, "checkRequireDownload: size: " + downloadedList.size());
+
         for (String lang : downloadedList) {
-            Log.d(TAG, "checkRequireDownload: d: " + lang);
             if (data.equalsIgnoreCase(lang)) {
                 if (type == 0) {
                     downloadedFrom = true;

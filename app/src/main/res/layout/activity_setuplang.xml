@@ -5,10 +5,10 @@
     android:layout_height="match_parent"
     android:background="@color/color7">
 
-    <include layout="@layout/toolbar_main"/>
+    <include layout="@layout/toolbar_setup"/>
 
     <ScrollView
-        android:layout_below="@id/main_appbar"
+        android:layout_below="@id/setuplang_appbar"
         android:nestedScrollingEnabled="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

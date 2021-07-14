@@ -19,20 +19,12 @@ import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.mlkit.common.model.DownloadConditions;
-import com.google.mlkit.common.model.RemoteModelManager;
-import com.google.mlkit.nl.translate.TranslateLanguage;
-import com.google.mlkit.nl.translate.TranslateRemoteModel;
-import com.google.mlkit.nl.translate.Translation;
-import com.google.mlkit.nl.translate.Translator;
-import com.google.mlkit.nl.translate.TranslatorOptions;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
-import com.wiryaimd.mangatranslator.ui.MainViewModel;
 import com.wiryaimd.mangatranslator.ui.main.fragment.SelectFragment;
 import com.wiryaimd.mangatranslator.ui.setup.SetupActivity;
 import com.wiryaimd.mangatranslator.ui.main.fragment.dialog.SelectDialog;
+import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.PermissionHelper;
 import com.wiryaimd.mangatranslator.util.RealPath;
 
@@ -42,7 +34,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,24 +44,17 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<String> launcherImg = registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), new ActivityResultCallback<List<Uri>>() {
         @Override
         public void onActivityResult(List<Uri> result) {
-            List<SelectedModel> selectedList = new ArrayList<>();
+            ArrayList<SelectedModel> selectedList = new ArrayList<>();
             for (Uri uri : result){
                 Cursor cursor = getContentResolver().query(uri, null, null, null, null);
                 int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                 cursor.moveToFirst();
                 selectedList.add(new SelectedModel(cursor.getColumnName(nameIndex), uri, SelectedModel.Type.IMAGE));
             }
-            mainViewModel.setSelectedModelLiveData(selectedList);
 
             Intent intent = new Intent(MainActivity.this, SetupActivity.class);
+            intent.putParcelableArrayListExtra(Const.SELECTED_LIST, selectedList);
             startActivity(intent);
-
-            //                // get bitmap
-//            try {
-//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), result);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
         }
     });
 
@@ -111,45 +95,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mainViewModel = new ViewModelProvider(MainActivity.this).get(MainViewModel.class);
-
-        TranslateRemoteModel translateRemoteModel = new TranslateRemoteModel.Builder(TranslateLanguage.INDONESIAN).build();
-
-        RemoteModelManager remoteModelManager = RemoteModelManager.getInstance();
-
-        Log.d(TAG, "onCreate: cekk");
-
-        remoteModelManager.getDownloadedModels(TranslateRemoteModel.class).addOnSuccessListener(new OnSuccessListener<Set<TranslateRemoteModel>>() {
-            @Override
-            public void onSuccess(@NonNull @NotNull Set<TranslateRemoteModel> translateRemoteModels) {
-                List<String> downloadedModel = new ArrayList<>();
-                for (TranslateRemoteModel model : translateRemoteModels){
-                    downloadedModel.add(model.getLanguage());
-                    Log.d(TAG, "onSuccess: lang: " + model.getLanguage());
-                }
-                mainViewModel.getDownloadedModelsLiveData().postValue(downloadedModel);
-            }
-        });
-
-        TranslatorOptions options = new TranslatorOptions.Builder().setSourceLanguage(TranslateLanguage.JAPANESE).setTargetLanguage(TranslateLanguage.INDONESIAN).build();
-        Translator translator = Translation.getClient(options);
-
-        DownloadConditions downloadConditions = new DownloadConditions.Builder().build();
-        Log.d(TAG, "onCreate: downloading");
-        // download brohh
-
-        translator.downloadModelIfNeeded(downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(@NonNull @NotNull Void unused) {
-
-            }
-        });
-
-//        remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
-//            @Override
-//            public void onSuccess(@NonNull @NotNull Void unused) {
-//
-//            }
-//        });
 
         MainViewModel.OpenFile openFile = new MainViewModel.OpenFile() {
             @Override
