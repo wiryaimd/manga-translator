@@ -7,25 +7,14 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/info_item_cardinfo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="168dp"
         android:layout_margin="6dp"
         app:cardCornerRadius="12dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:padding="12dp">
-
-            <ImageView
-                android:id="@+id/info_item_close"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_alignParentEnd="true"
-                android:layout_margin="6dp"
-                android:src="@drawable/ic_close"
-                android:visibility="gone">
-
-            </ImageView>
 
             <LinearLayout
                 android:id="@+id/info_item_lineartitle"
@@ -48,7 +37,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="6dp"
-                    android:layout_toEndOf="@id/info_item_imgalert"
                     android:layout_weight="1"
                     android:text="Info"
                     android:textColor="@color/primary"
@@ -58,29 +46,36 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/info_item_desc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/info_item_lineartitle"
-                android:fontFamily="@font/sfreguler"
-                android:text="Currently, for non-latin comic language need to select the text manually, if you want automatic translate you can translate the latin comic e.g Manga in english, france etc"
-                android:textSize="16sp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/info_item_lineartitle">
 
-            </TextView>
+                <TextView
+                    android:id="@+id/info_item_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/sfreguler"
+                    android:text="Currently, for non-latin comic language need to select the text manually, if you want automatic translate you can translate the latin comic e.g Manga in english, france etc"
+                    android:textSize="16sp">
 
-            <Button
-                android:id="@+id/info_item_ok"
-                android:layout_width="80dp"
-                android:layout_height="50dp"
-                android:layout_below="@id/info_item_desc"
-                android:layout_alignParentEnd="true"
-                android:letterSpacing="0.2"
-                android:text="Ok"
-                android:textColor="@color/white"
-                android:visibility="gone">
+                </TextView>
 
-            </Button>
+                <Button
+                    android:id="@+id/info_item_ok"
+                    android:layout_width="80dp"
+                    android:layout_height="50dp"
+                    android:layout_below="@id/info_item_desc"
+                    android:layout_alignParentEnd="true"
+                    android:letterSpacing="0.2"
+                    android:text="Ok"
+                    android:textColor="@color/white"
+                    android:visibility="gone">
+
+                </Button>
+
+            </RelativeLayout>
 
         </RelativeLayout>
 

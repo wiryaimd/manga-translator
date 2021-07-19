@@ -2,6 +2,7 @@ package com.wiryaimd.mangatranslator.ui.setup.fragment.dialog;
 
 import android.content.ContentResolver;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -34,6 +35,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.mlkit.nl.translate.TranslateLanguage;
 import com.google.mlkit.nl.translate.Translation;
 import com.google.mlkit.nl.translate.Translator;
 import com.google.mlkit.nl.translate.TranslatorOptions;
@@ -43,14 +45,18 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.TextRecognizerOptions;
 import com.wiryaimd.mangatranslator.R;
+import com.wiryaimd.mangatranslator.model.ResultModel;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
+import com.wiryaimd.mangatranslator.ui.result.ResultActivity;
 import com.wiryaimd.mangatranslator.ui.setup.SetupActivity;
 import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
+import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
 import com.wiryaimd.mangatranslator.util.RealPath;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -73,6 +79,8 @@ public class ProcessDialog extends DialogFragment {
 
     private List<SelectedModel> selectedList;
     private List<Bitmap> bitmapList;
+    private ArrayList<ResultModel> resultList;
+
     private int flagFrom, flagTo;
 
     private Translator translator;
@@ -108,6 +116,8 @@ public class ProcessDialog extends DialogFragment {
                 setupViewModel.getSelectedModelLiveData().getValue() == null){
             return;
         }
+        resultList = new ArrayList<>();
+        bitmapList = new ArrayList<>();
 
         textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
 
@@ -125,7 +135,6 @@ public class ProcessDialog extends DialogFragment {
         paintBg = new Paint();
         paintBg.setColor(Color.WHITE);
 
-        Typeface typeface = Typeface.createFromAsset(setupViewModel.getApplication().getAssets(), "sfbold.ttf");
         paintText = new Paint();
         paintText.setTypeface(Typeface.DEFAULT_BOLD);
         paintText.setColor(Color.BLACK);
@@ -145,7 +154,13 @@ public class ProcessDialog extends DialogFragment {
         }else{
             tvinfo.setText(("Processing image " + countTranslate + "/" + selectedList.size()));
         }
-        detectText();
+
+        if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.ENGLISH) ||
+                LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.INDONESIAN)) {
+            detectText();
+        }else{
+            // dooo recog mikocok
+        }
     }
 
     public List<Bitmap> loadBitmapList(){
@@ -311,14 +326,27 @@ public class ProcessDialog extends DialogFragment {
     }
 
     public void saveBitmap(){
+        if (bitmapList.size() != 0) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+            resultList.add(new ResultModel(stream.toByteArray()));
+
+            try {
+                stream.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            updateData();
+            return;
+        }
+
         File dir = new File(Environment.getExternalStorageDirectory().toString());
         dir.mkdirs();
         String filename;
-        if (bitmapList.size() != 0) {
-            filename = "mngTranslator-" + selectedList.get(0).getName() + " (" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
-        }else{
-            filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
-        }
+
+        filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+
         File file = new File(dir, filename);
         if (file.exists()){
             file.delete();
@@ -341,10 +369,14 @@ public class ProcessDialog extends DialogFragment {
     public void updateData(){
         countTranslate += 1;
 
+        Intent intent = new Intent(setupViewModel.getApplication(), ResultActivity.class);
+        intent.putParcelableArrayListExtra(Const.BITMAP_RESULT_LIST, resultList);
+
         if (bitmapList.size() != 0){
             if (countTranslate < bitmapList.size()){
                 detectText();
             }else{
+                startActivity(intent);
                 if (getDialog() != null) getDialog().dismiss();
             }
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));

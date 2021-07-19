@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -60,6 +62,7 @@ public class SetupActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private Button btnrequire, btnprocess;
+    private ProgressBar loading;
     private ImageView imgalert;
 
     private Spinner spinFrom, spinTo;
@@ -68,7 +71,6 @@ public class SetupActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private ArrayList<SelectedModel> selectedList = new ArrayList<>();
-    private List<Bitmap> bitmapList = new ArrayList<>();
     private List<String> downloadedList = new ArrayList<>();
 
     private TranslateRemoteModel translateRemoteModel;
@@ -76,6 +78,7 @@ public class SetupActivity extends AppCompatActivity {
     private DownloadConditions downloadConditions;
 
     private int flagFrom = 0, flagTo = 0;
+    private boolean sucFrom = false, sucTo = false;
 
     @Override
     protected void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -89,6 +92,7 @@ public class SetupActivity extends AppCompatActivity {
 
         btnrequire = findViewById(R.id.setuplang_downloadlanguages);
         btnprocess = findViewById(R.id.setuplang_processtranslate);
+        loading = findViewById(R.id.setuplang_loadingdownload);
         imgalert = findViewById(R.id.setuplang_imgalert);
         spinFrom = findViewById(R.id.setuplang_spinfrom);
         spinTo = findViewById(R.id.setuplang_spinto);
@@ -217,13 +221,22 @@ public class SetupActivity extends AppCompatActivity {
                 if (flagTo == 0 && flagFrom == 0){
                     return;
                 }
+                sucFrom = false;
+                sucTo =  false;
+
+                btnprocess.setEnabled(false);
+                imgalert.setVisibility(View.GONE);
+                loading.setVisibility(View.VISIBLE);
 
                 if (flagFrom == flagTo && !downloadedFrom){
+
                     translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_from[flagFrom]).build();
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
-
+                            btnrequire.setVisibility(View.GONE);
+                            loading.setVisibility(View.GONE);
+                            btnprocess.setEnabled(true);
                         }
                     });
                     return;
@@ -234,14 +247,24 @@ public class SetupActivity extends AppCompatActivity {
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
-
+                            sucFrom = true;
+                            if (sucFrom && sucTo){
+                                btnrequire.setVisibility(View.GONE);
+                                loading.setVisibility(View.GONE);
+                                btnprocess.setEnabled(true);
+                            }
                         }
                     });
                     translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_to[flagTo]).build();
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
-
+                            sucTo = true;
+                            if (sucFrom && sucTo){
+                                btnrequire.setVisibility(View.GONE);
+                                loading.setVisibility(View.GONE);
+                                btnprocess.setEnabled(true);
+                            }
                         }
                     });
                 }else if(!downloadedFrom && flagFrom != 0){
@@ -249,7 +272,9 @@ public class SetupActivity extends AppCompatActivity {
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
-
+                            btnrequire.setVisibility(View.GONE);
+                            loading.setVisibility(View.GONE);
+                            btnprocess.setEnabled(true);
                         }
                     });
                 }else if(!downloadedTo && flagTo != 0){
@@ -257,7 +282,9 @@ public class SetupActivity extends AppCompatActivity {
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
-
+                            btnrequire.setVisibility(View.GONE);
+                            loading.setVisibility(View.GONE);
+                            btnprocess.setEnabled(true);
                         }
                     });
                 }

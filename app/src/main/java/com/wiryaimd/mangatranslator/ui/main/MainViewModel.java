@@ -29,6 +29,10 @@ public class MainViewModel extends AndroidViewModel {
         repository = new MtRepository();
     }
 
+    public MtRepository getRepository() {
+        return repository;
+    }
+
     public ApiEndpoint getApiEndpoint(){
         return repository.getApiEndpoint();
     }
