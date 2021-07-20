@@ -53,6 +53,9 @@ import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
 import com.wiryaimd.mangatranslator.util.RealPath;
+import com.wiryaimd.mangatranslator.util.translator.GTranslate;
+import com.wiryaimd.mangatranslator.util.translator.draw.LatinDraw;
+import com.wiryaimd.mangatranslator.util.vision.GRecognition;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -83,14 +86,12 @@ public class ProcessDialog extends DialogFragment {
 
     private int flagFrom, flagTo;
 
-    private Translator translator;
-    private TextRecognizer textRecognizer;
-
     private int countTranslate;
 
+    private GRecognition gRecognition;
+    private GTranslate gTranslate;
+
     private Bitmap bitmap;
-    private Canvas canvas;
-    private Paint paintBg, paintText, paintStroke;
 
     @Nullable
     @org.jetbrains.annotations.Nullable
@@ -119,30 +120,9 @@ public class ProcessDialog extends DialogFragment {
         resultList = new ArrayList<>();
         bitmapList = new ArrayList<>();
 
-        textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-
         flagFrom = setupViewModel.getFlagFromLiveData().getValue();
         flagTo = setupViewModel.getFlagToLiveData().getValue();
         selectedList = setupViewModel.getSelectedModelLiveData().getValue();
-
-        TranslatorOptions options = new TranslatorOptions.Builder()
-                .setSourceLanguage(LanguagesData.flag_id_from[flagFrom])
-                .setTargetLanguage(LanguagesData.flag_id_to[flagTo])
-                .build();
-        
-        translator = Translation.getClient(options);
-
-        paintBg = new Paint();
-        paintBg.setColor(Color.WHITE);
-
-        paintText = new Paint();
-        paintText.setTypeface(Typeface.DEFAULT_BOLD);
-        paintText.setColor(Color.BLACK);
-
-        paintStroke = new Paint();
-        paintStroke.setTypeface(Typeface.DEFAULT_BOLD);
-        paintStroke.setStyle(Paint.Style.STROKE);
-        paintStroke.setColor(Color.WHITE);
         
         if (selectedList.size() == 0){
             return;
@@ -157,10 +137,47 @@ public class ProcessDialog extends DialogFragment {
 
         if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.ENGLISH) ||
                 LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.INDONESIAN)) {
+            gRecognition = setupViewModel.getGRecognition();
+            gTranslate = setupViewModel.getGTranslate();
+            gTranslate.init(LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo]);
+
             detectText();
+
         }else{
             // dooo recog mikocok
         }
+    }
+
+    public void detectText(){
+        LatinDraw latinDraw = new LatinDraw();
+        bitmap = gRecognition.loadBitmap(selectedList.get(countTranslate).getUri());
+
+        // detect text
+        gRecognition.detect(bitmap, new GRecognition.Listener() {
+            @Override
+            public void completeDetect(Iterator<Text.TextBlock> block, Canvas canvas) {
+                // draw bg & get position
+                boolean isFinish = latinDraw.update(block, canvas);
+                if (isFinish){
+                    addBitmap();
+                }
+
+                // translate text
+                gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
+                    @Override
+                    public void complete(String translated, String source) {
+                        // draw translated
+                        latinDraw.drawTranslated(translated, source, canvas);
+
+                        if (block.hasNext()) {
+                            completeDetect(block, canvas);
+                        }else{
+                            addBitmap();
+                        }
+                    }
+                });
+            }
+        });
     }
 
     public List<Bitmap> loadBitmapList(){
@@ -191,141 +208,7 @@ public class ProcessDialog extends DialogFragment {
         return bitmapList;
     }
 
-    public static Bitmap getBitmap(ContentResolver cr, Uri url) throws FileNotFoundException, IOException {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inMutable = true;
-        InputStream input = cr.openInputStream(url);
-        Bitmap bitmap = BitmapFactory.decodeStream(input, null, options);
-        input.close();
-        return bitmap;
-    }
-
-    public void detectText(){
-        try {
-            if (selectedList.get(0).getType() == SelectedModel.Type.IMAGE) {
-                bitmap = getBitmap(setupViewModel.getApplication().getContentResolver(), selectedList.get(countTranslate).getUri());
-            }else{
-                if (countTranslate < 3){
-                    countTranslate += 1;
-                    detectText();
-                    return;
-                }
-                bitmap = bitmapList.get(countTranslate);
-            }
-            canvas = new Canvas(bitmap);
-
-            InputImage inputImage = InputImage.fromBitmap(bitmap, 0);
-
-            Task<Text> task = textRecognizer.process(inputImage).addOnCompleteListener(new OnCompleteListener<Text>() {
-                @Override
-                public void onComplete(@NonNull @NotNull Task<Text> task) {
-                    Iterator<Text.TextBlock> block = task.getResult().getTextBlocks().iterator();
-                    if (block.hasNext()) {
-                        processText(block);
-                    }
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull @NotNull Exception e) {
-
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private float textLength, avgWidth, avgHeight, mid;
-
-    public void processText(Iterator<Text.TextBlock> block){
-        Text.TextBlock textBlock = block.next();
-
-        String result = textBlock.getText().replaceAll("\\n", " ").replaceAll("\\.", " ");
-        Log.d(TAG, "processText: text block: " + result);
-
-        if (textBlock.getBoundingBox() == null){
-            if (block.hasNext()) {
-                processText(block);
-            }else{
-                saveBitmap();
-            }
-            return;
-        }
-
-        avgWidth = 0; avgHeight = 0; int countSize = 0;
-        for (Text.Line line : textBlock.getLines()){
-            if (line.getBoundingBox() != null){
-                avgWidth += (line.getBoundingBox().right - line.getBoundingBox().left);
-                avgHeight += (line.getBoundingBox().bottom - line.getBoundingBox().top);
-            }else{
-                countSize += 1;
-            }
-            canvas.drawRect(line.getBoundingBox(), paintBg);
-        }
-        avgHeight = avgHeight / (textBlock.getLines().size() - countSize);
-        avgWidth = avgWidth / (textBlock.getLines().size() -  countSize);
-
-        mid = (float)(textBlock.getBoundingBox().left + ((textBlock.getBoundingBox().right - textBlock.getBoundingBox().left) / 2));
-//        int midHeight = (textBlock.getBoundingBox().top + ((textBlock.getBoundingBox().bottom - textBlock.getBoundingBox().top) / 2));
-//        int pixel = bitmap.getPixel((int)mid, bitmap.getHeight() - midHeight);
-//        int resultColor = Color.rgb(Color.red(pixel), Color.green(pixel), Color.blue(pixel));
-//        paintBg.setColor(resultColor);
-
-        textLength = (avgWidth / avgHeight);
-        textLength = textLength + (float)(textLength * 0.20);
-        Log.d(TAG, "processText: avgWidth: " + avgWidth);
-        Log.d(TAG, "processText: avgHeight: " + avgHeight);
-        Log.d(TAG, "processText: textLength: " + textLength);
-
-        translator.translate(result.toLowerCase()).addOnSuccessListener(new OnSuccessListener<String>() {
-            @Override
-            public void onSuccess(@NonNull @NotNull String s) {
-                StringBuilder sb = new StringBuilder();
-                String[] res = s.split("\\s+|\\n");
-
-                if (s.length() > textBlock.getText().length()){
-                    paintText.setTextSize(avgHeight);
-                    paintStroke.setTextSize(avgHeight);
-                }else{
-                    paintText.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
-                    paintStroke.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
-                }
-                float avgStroke = (float)(avgHeight * 0.04);
-                paintStroke.setStrokeWidth(avgStroke);
-
-                int countLength = 0;
-                for (String str : res){
-                    sb.append(str).append(" ");
-                    if ((sb.length() - countLength) > textLength){
-                        sb.append("\n");
-                        countLength = sb.length();
-                    }
-                }
-
-                int i = 0;
-                for (String draw : sb.toString().split("\\n")) {
-                    Log.d(TAG, "onSuccess: measure: " + paintText.measureText(draw));
-                    float textMid = mid - (paintText.measureText(draw) / 2);
-                    float textY = textBlock.getBoundingBox().top + avgHeight + i;
-                    canvas.drawText(draw.toUpperCase(), textMid, textY, paintText);
-                    canvas.drawText(draw.toUpperCase(), textMid, textY, paintStroke);
-                    i += avgHeight;
-                }
-                if (block.hasNext()) {
-                    processText(block);
-                }else{
-                    saveBitmap();
-                }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull @NotNull Exception e) {
-                Log.d(TAG, "onFailure: fail translate: " + e.getMessage());
-            }
-        });
-    }
-
-    public void saveBitmap(){
+    public void addBitmap(){
         if (bitmapList.size() != 0) {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
@@ -365,7 +248,7 @@ public class ProcessDialog extends DialogFragment {
             e.printStackTrace();
         }
     }
-    
+
     public void updateData(){
         countTranslate += 1;
 
@@ -393,8 +276,7 @@ public class ProcessDialog extends DialogFragment {
     @Override
     public void onDismiss(@NonNull @NotNull DialogInterface dialog) {
         super.onDismiss(dialog);
-        
-        if (translator != null) translator.close();
-        Log.d(TAG, "onDismiss: cek close");
+
+        if (gTranslate != null) gTranslate.close();
     }
 }

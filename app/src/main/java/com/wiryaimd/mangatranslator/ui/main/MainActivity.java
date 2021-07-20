@@ -23,6 +23,7 @@ import com.wiryaimd.mangatranslator.ui.setup.SetupActivity;
 import com.wiryaimd.mangatranslator.ui.main.fragment.dialog.SelectDialog;
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.PermissionHelper;
+import com.wiryaimd.mangatranslator.util.translator.AWSTranslate;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mainViewModel = new ViewModelProvider(MainActivity.this).get(MainViewModel.class);
+        mainViewModel.getStorage().init();
 
         MainViewModel.OpenFile openFile = new MainViewModel.OpenFile() {
             @Override

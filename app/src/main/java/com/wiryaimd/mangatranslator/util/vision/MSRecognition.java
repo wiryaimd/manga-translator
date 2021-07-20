@@ -1,4 +1,4 @@
-package com.wiryaimd.mangatranslator;
+package com.wiryaimd.mangatranslator.util.vision;
 
 import android.util.Log;
 
@@ -20,37 +20,29 @@ import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MtRepository {
+public class MSRecognition {
 
     private static final String TAG = "MtRepository";
 
-    private ApiEndpoint apiEndpoint;
+    private static MSRecognition instance = null;
 
     private OkHttpClient client;
     private MediaType mediaType;
 
     private Gson gson;
 
-    public MtRepository(){
+    public static MSRecognition getInstance(){
+        if (instance == null){
+            instance = new MSRecognition();
+        }
+        return instance;
+    }
+
+    public MSRecognition(){
         client = new OkHttpClient();
         mediaType = MediaType.parse("application/json");
 
         gson = new Gson();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Const.BASE_URL_API)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        apiEndpoint = retrofit.create(ApiEndpoint.class);
-    }
-
-    public ApiEndpoint getApiEndpoint() {
-        return apiEndpoint;
-    }
-
-    public void requestTranslate(){
-
     }
 
     public void requestDetectModel(String img, String options){
@@ -83,6 +75,8 @@ public class MtRepository {
 
                 ResponseBody responseBody = response.body();
                 String str = responseBody.string();
+                DetectModel detectModel = toDetectModel(str);
+                Log.d(TAG, "onResponse: lang: " + detectModel.getLang());
                 Log.d(TAG, "onResponse: str: " + str);
 
                 Log.d(TAG, "onResponse: response: " + response.body().toString());

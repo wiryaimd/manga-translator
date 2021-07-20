@@ -4,14 +4,10 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
-import com.wiryaimd.mangatranslator.MtRepository;
+import com.wiryaimd.mangatranslator.util.storage.CStorage;
+import com.wiryaimd.mangatranslator.util.vision.MSRecognition;
 import com.wiryaimd.mangatranslator.api.ApiEndpoint;
-import com.wiryaimd.mangatranslator.model.SelectedModel;
-
-import java.util.List;
 
 public class MainViewModel extends AndroidViewModel {
 
@@ -21,20 +17,23 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     private OpenFile openFile;
-    private MtRepository repository;
+    private CStorage storage;
+
+    private MSRecognition msRecognition;
 
     public MainViewModel(@NonNull @org.jetbrains.annotations.NotNull Application application) {
         super(application);
 
-        repository = new MtRepository();
+        msRecognition = MSRecognition.getInstance();
+        storage = CStorage.getInstance(getApplication());
     }
 
-    public MtRepository getRepository() {
-        return repository;
+    public CStorage getStorage() {
+        return storage;
     }
 
-    public ApiEndpoint getApiEndpoint(){
-        return repository.getApiEndpoint();
+    public MSRecognition getMsRecognition() {
+        return msRecognition;
     }
 
     public OpenFile getOpenFile() {
