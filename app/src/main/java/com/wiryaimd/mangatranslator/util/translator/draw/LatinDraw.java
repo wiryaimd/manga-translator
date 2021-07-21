@@ -19,6 +19,8 @@ public class LatinDraw {
 
     private Text.TextBlock textBlock;
 
+    private String nextText;
+
     public LatinDraw(){
 
         paintBg = new Paint();
@@ -37,6 +39,7 @@ public class LatinDraw {
 
     public boolean update(Iterator<Text.TextBlock> block, Canvas canvas) {
         this.textBlock = block.next();
+        Log.d(TAG, "update: textBlock: " + textBlock.getText());
 
         if (textBlock.getBoundingBox() == null){
             if (block.hasNext()) {
@@ -67,18 +70,22 @@ public class LatinDraw {
         return false;
     }
 
+    public String nextText(){
+        return nextText;
+    }
+
     public void drawTranslated(String translated, String original, Canvas canvas){
         if (textBlock.getBoundingBox() == null){
             return;
         }
 
-        if (translated.length() > original.length()){
+//        if (translated.length() > original.length()){
             paintText.setTextSize(avgHeight);
             paintStroke.setTextSize(avgHeight);
-        }else{
-            paintText.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
-            paintStroke.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
-        }
+//        }else{
+//            paintText.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
+//            paintStroke.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
+//        }
         float avgStroke = (float)(avgHeight * 0.04);
         paintStroke.setStrokeWidth(avgStroke);
 

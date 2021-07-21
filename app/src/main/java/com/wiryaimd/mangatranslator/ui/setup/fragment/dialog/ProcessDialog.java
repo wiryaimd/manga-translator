@@ -45,6 +45,7 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.TextRecognizerOptions;
 import com.wiryaimd.mangatranslator.R;
+import com.wiryaimd.mangatranslator.api.model.DetectModel;
 import com.wiryaimd.mangatranslator.model.ResultModel;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
 import com.wiryaimd.mangatranslator.ui.result.ResultActivity;
@@ -130,9 +131,9 @@ public class ProcessDialog extends DialogFragment {
 
         if (selectedList.get(0).getType() == SelectedModel.Type.PDF) {
             bitmapList = loadBitmapList();
-            tvinfo.setText(("Processing image " + countTranslate + "/" + bitmapList.size()));
+            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
         }else{
-            tvinfo.setText(("Processing image " + countTranslate + "/" + selectedList.size()));
+            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
 
         if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.ENGLISH) ||
@@ -150,7 +151,11 @@ public class ProcessDialog extends DialogFragment {
 
     public void detectText(){
         LatinDraw latinDraw = new LatinDraw();
-        bitmap = gRecognition.loadBitmap(selectedList.get(countTranslate).getUri());
+        if (selectedList.get(0).getType() == SelectedModel.Type.IMAGE) {
+            bitmap = loadBitmap(selectedList.get(countTranslate).getUri());
+        }else{
+            bitmap = bitmapList.get(countTranslate);
+        }
 
         // detect text
         gRecognition.detect(bitmap, new GRecognition.Listener() {
@@ -196,7 +201,7 @@ public class ProcessDialog extends DialogFragment {
                 canvas.drawColor(Color.WHITE);
                 canvas.drawBitmap(bitmap, 0, 0, null);
                 Rect r = new Rect(0, 0, width, height);
-                page.render(bitmap, r, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                page.render(bitmap, r, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT);
                 bitmapList.add(bitmap);
                 page.close();
             }
@@ -209,26 +214,30 @@ public class ProcessDialog extends DialogFragment {
     }
 
     public void addBitmap(){
-        if (bitmapList.size() != 0) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
-            resultList.add(new ResultModel(stream.toByteArray()));
-
-            try {
-                stream.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            updateData();
-            return;
-        }
+//        if (bitmapList.size() != 0) {
+//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+//            resultList.add(new ResultModel(stream.toByteArray()));
+//
+//            try {
+//                stream.flush();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            updateData();
+//            return;
+//        }
 
         File dir = new File(Environment.getExternalStorageDirectory().toString());
         dir.mkdirs();
         String filename;
 
-        filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+        if (bitmapList.size() == 0) {
+            filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+        }else{
+            filename = "mngTranslator-" + "pdf" + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+        }
 
         File file = new File(dir, filename);
         if (file.exists()){
@@ -259,7 +268,7 @@ public class ProcessDialog extends DialogFragment {
             if (countTranslate < bitmapList.size()){
                 detectText();
             }else{
-                startActivity(intent);
+//                startActivity(intent);
                 if (getDialog() != null) getDialog().dismiss();
             }
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
@@ -271,6 +280,22 @@ public class ProcessDialog extends DialogFragment {
             }
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
+    }
+
+    public Bitmap loadBitmap(Uri uri){
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inMutable = true;
+        try {
+            InputStream input = setupViewModel.getApplication().getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(input, null, options);
+            input.close();
+
+            return bitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     @Override

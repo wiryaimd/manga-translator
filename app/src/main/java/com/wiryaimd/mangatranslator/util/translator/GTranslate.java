@@ -48,7 +48,7 @@ public class GTranslate {
     }
 
     public void translate(String source, Listener listener){
-        String result = source.replaceAll("\\n", " ").replaceAll("\\.", " ");
+        String result = source.replaceAll("\\n", " ").replaceAll("-", " ").replaceAll("\\.", " ");
         translator.translate(result.toLowerCase()).addOnSuccessListener(new OnSuccessListener<String>() {
             @Override
             public void onSuccess(@NonNull @NotNull String s) {

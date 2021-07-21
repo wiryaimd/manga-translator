@@ -40,7 +40,7 @@ public class SetupViewModel extends AndroidViewModel {
         gTranslate = GTranslate.getInstance();
 
         msRecognition = MSRecognition.getInstance();
-        gRecognition = GRecognition.getInstance(getApplication());
+        gRecognition = GRecognition.getInstance();
 
         storage = CStorage.getInstance(getApplication());
     }
