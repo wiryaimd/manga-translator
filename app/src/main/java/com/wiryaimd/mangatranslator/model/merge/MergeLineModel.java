@@ -1,13 +1,13 @@
-package com.wiryaimd.mangatranslator.model;
+package com.wiryaimd.mangatranslator.model.merge;
 
 import android.graphics.Rect;
 
-public class MergeModel {
+public class MergeLineModel {
 
     private String text;
     private Rect rect;
 
-    public MergeModel(String text, Rect rect) {
+    public MergeLineModel(String text, Rect rect) {
         this.text = text;
         this.rect = rect;
     }

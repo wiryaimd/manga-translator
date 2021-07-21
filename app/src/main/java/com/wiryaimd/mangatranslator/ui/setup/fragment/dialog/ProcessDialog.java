@@ -48,6 +48,7 @@ import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.api.model.DetectModel;
 import com.wiryaimd.mangatranslator.model.ResultModel;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
+import com.wiryaimd.mangatranslator.model.merge.MergeBlockModel;
 import com.wiryaimd.mangatranslator.ui.result.ResultActivity;
 import com.wiryaimd.mangatranslator.ui.setup.SetupActivity;
 import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
@@ -160,7 +161,7 @@ public class ProcessDialog extends DialogFragment {
         // detect text
         gRecognition.detect(bitmap, new GRecognition.Listener() {
             @Override
-            public void completeDetect(Iterator<Text.TextBlock> block, Canvas canvas) {
+            public void completeDetect(Iterator<MergeBlockModel> block, Canvas canvas) {
                 // draw bg & get position
                 boolean isFinish = latinDraw.update(block, canvas);
                 if (isFinish){
