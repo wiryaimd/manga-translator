@@ -1,13 +1,19 @@
 package com.wiryaimd.mangatranslator.util.vision;
 
+import android.graphics.Rect;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.wiryaimd.mangatranslator.api.ApiEndpoint;
 import com.wiryaimd.mangatranslator.api.model.DetectModel;
+import com.wiryaimd.mangatranslator.model.merge.MergeLineModel;
 import com.wiryaimd.mangatranslator.util.Const;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -31,6 +37,11 @@ public class MSRecognition {
 
     private Gson gson;
 
+    public interface Listener{
+        void success(Response response);
+        List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel);
+    }
+
     public static MSRecognition getInstance(){
         if (instance == null){
             instance = new MSRecognition();
@@ -45,7 +56,7 @@ public class MSRecognition {
         gson = new Gson();
     }
 
-    public void requestDetectModel(String img, String options){
+    public void requestDetectModel(String img, String options, Listener listener){
         RequestBody body = RequestBody.create("{\r\"url\": \"" + img + "\"\r }", mediaType);
 
         Request request = new Request.Builder()
@@ -58,12 +69,13 @@ public class MSRecognition {
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
 
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+
                 if (!response.isSuccessful()){
                     Log.d(TAG, "onResponse: ngapasich: " + response.code() + " " + response.message());
                     return;
@@ -73,15 +85,50 @@ public class MSRecognition {
                     return;
                 }
 
-                ResponseBody responseBody = response.body();
-                String str = responseBody.string();
-                DetectModel detectModel = toDetectModel(str);
-                Log.d(TAG, "onResponse: lang: " + detectModel.getLang());
-                Log.d(TAG, "onResponse: str: " + str);
+                try {
+                    String str = response.body().string(); // json string
+                    Log.d(TAG, "success: json: " + str);
 
-                Log.d(TAG, "onResponse: response: " + response.body().toString());
+                    // convert json to object class
+                    DetectModel detectModel = toDetectModel(str);
+
+                    List<MergeLineModel> mergeLineList = new ArrayList<>();
+                    for (DetectModel.Regions region : detectModel.getRegions()){
+                        Log.d(TAG, "success: region");
+                        for (DetectModel.Lines line : region.getLines()){
+                            Log.d(TAG, "success: line");
+
+                            StringBuilder tempLine = new StringBuilder();
+                            String[] pos = line.getBoundingBox().split(",");
+                            int left = Integer.parseInt(pos[0]), top = Integer.parseInt(pos[1]), right = Integer.parseInt(pos[2]), bottom = Integer.parseInt(pos[3]);
+                            Rect rect = new Rect(left, top, right, bottom);
+
+                            for(DetectModel.Words word : line.getWords()){
+                                Log.d(TAG, "success: ms word: " + word.getText());
+                                tempLine.append(word);
+                            }
+
+                            mergeLineList.add(new MergeLineModel(tempLine.toString(), rect));
+                        }
+                    }
+
+                    if (detectModel.getLang().equalsIgnoreCase("ja")){
+                        mergeJapan();
+                    }else{
+
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                listener.success(response);
             }
         });
+
+    }
+
+    public void mergeJapan(){
 
     }
 

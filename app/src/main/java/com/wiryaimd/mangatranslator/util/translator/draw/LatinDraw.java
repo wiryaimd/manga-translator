@@ -103,7 +103,7 @@ public class LatinDraw {
             float textMid = mid - (paintText.measureText(draw) / 2);
             float textY = textBlock.getBoundingBox().top + avgHeight + i;
             canvas.drawText(draw.toUpperCase(), textMid, textY, paintText);
-            canvas.drawText(draw.toUpperCase(), textMid, textY, paintStroke);
+//            canvas.drawText(draw.toUpperCase(), textMid, textY, paintStroke);
             i += avgHeight;
         }
         Log.d(TAG, "drawTranslated: drawed brohh");

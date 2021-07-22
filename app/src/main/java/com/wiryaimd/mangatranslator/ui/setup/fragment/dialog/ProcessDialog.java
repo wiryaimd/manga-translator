@@ -35,6 +35,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.mlkit.nl.translate.TranslateLanguage;
 import com.google.mlkit.nl.translate.Translation;
 import com.google.mlkit.nl.translate.Translator;
@@ -49,15 +50,18 @@ import com.wiryaimd.mangatranslator.api.model.DetectModel;
 import com.wiryaimd.mangatranslator.model.ResultModel;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
 import com.wiryaimd.mangatranslator.model.merge.MergeBlockModel;
+import com.wiryaimd.mangatranslator.model.merge.MergeLineModel;
 import com.wiryaimd.mangatranslator.ui.result.ResultActivity;
 import com.wiryaimd.mangatranslator.ui.setup.SetupActivity;
 import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
 import com.wiryaimd.mangatranslator.util.RealPath;
+import com.wiryaimd.mangatranslator.util.storage.CStorage;
 import com.wiryaimd.mangatranslator.util.translator.GTranslate;
 import com.wiryaimd.mangatranslator.util.translator.draw.LatinDraw;
 import com.wiryaimd.mangatranslator.util.vision.GRecognition;
+import com.wiryaimd.mangatranslator.util.vision.MSRecognition;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -72,6 +76,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executor;
+
+import okhttp3.Response;
 
 public class ProcessDialog extends DialogFragment {
 
@@ -92,6 +98,7 @@ public class ProcessDialog extends DialogFragment {
 
     private GRecognition gRecognition;
     private GTranslate gTranslate;
+    private CStorage storage;
 
     private Bitmap bitmap;
 
@@ -119,6 +126,7 @@ public class ProcessDialog extends DialogFragment {
                 setupViewModel.getSelectedModelLiveData().getValue() == null){
             return;
         }
+        storage = new CStorage();
         resultList = new ArrayList<>();
         bitmapList = new ArrayList<>();
 
@@ -147,16 +155,45 @@ public class ProcessDialog extends DialogFragment {
 
         }else{
             // dooo recog mikocok
+            Log.d(TAG, "onViewCreated: nlatin");
+            detectNLatin();
         }
     }
 
-    public void detectText(){
-        LatinDraw latinDraw = new LatinDraw();
+    public void detectNLatin(){
+        checkBitmap();
+        String options = "detectOrientation=true&language=" + LanguagesData.flag_code_from[flagFrom];
+
+        storage.uploadImg(bitmap, new CStorage.Listener() {
+            @Override
+            public void success(String url) {
+                Log.d(TAG, "success: url img: " + url);
+                setupViewModel.getMsRecognition().requestDetectModel(url, options, new MSRecognition.Listener() {
+                    @Override
+                    public void success(Response response) {
+
+                    }
+
+                    @Override
+                    public List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel) {
+                        return setupViewModel.getGRecognition().merge(mergeList, mergeLineModel);
+                    }
+                });
+            }
+        });
+    }
+
+    public void checkBitmap(){
         if (selectedList.get(0).getType() == SelectedModel.Type.IMAGE) {
             bitmap = loadBitmap(selectedList.get(countTranslate).getUri());
         }else{
             bitmap = bitmapList.get(countTranslate);
         }
+    }
+
+    public void detectText(){
+        LatinDraw latinDraw = new LatinDraw();
+        checkBitmap();
 
         // detect text
         gRecognition.detect(bitmap, new GRecognition.Listener() {

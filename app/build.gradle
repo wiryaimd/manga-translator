@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -42,6 +43,7 @@ dependencies {
     // firebase
     implementation platform('com.google.firebase:firebase-bom:28.2.0')
     implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-storage'
 
     // for latin text recognition
     implementation 'com.google.android.gms:play-services-mlkit-text-recognition:16.3.0'
@@ -63,9 +65,6 @@ dependencies {
 
     // aws translate
     implementation 'com.amazonaws:aws-android-sdk-translate:2.6.20'
-
-    // storage image
-    implementation 'com.cloudinary:cloudinary-android-core:1.30.0'
 
     // apache logging
     implementation 'commons-logging:commons-logging-api:1.1'

@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.util.Log;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
 import com.wiryaimd.mangatranslator.ui.main.fragment.SelectFragment;
@@ -28,7 +30,9 @@ import com.wiryaimd.mangatranslator.util.translator.AWSTranslate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -84,8 +88,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        FirebaseApp.initializeApp(MainActivity.this);
+
         mainViewModel = new ViewModelProvider(MainActivity.this).get(MainViewModel.class);
-        mainViewModel.getStorage().init();
 
         MainViewModel.OpenFile openFile = new MainViewModel.OpenFile() {
             @Override

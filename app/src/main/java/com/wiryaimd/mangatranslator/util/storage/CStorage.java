@@ -1,87 +1,65 @@
 package com.wiryaimd.mangatranslator.util.storage;
 
-import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Log;
 
-import com.cloudinary.android.MediaManager;
-import com.cloudinary.android.callback.ErrorInfo;
-import com.cloudinary.android.callback.UploadCallback;
-import com.wiryaimd.mangatranslator.util.Const;
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class CStorage {
 
     private static final String TAG = "CStorage";
 
-    private static CStorage instance = null;
-    
-    private Context context;
+    private StorageReference storageRef;
 
-    interface Listener{
-        void success(String requestId, String fileName);
+    public interface Listener{
+        void success(String url);
     }
 
-    public static CStorage getInstance(Context context) {
-        if (instance == null){
-            instance = new CStorage(context);
-        }
-        return instance;
-    }
-
-    public CStorage(Context context) {
-        this.context = context;
-        Log.d(TAG, "CStorage: cekk bosss storage");
-    }
-    
-    public void init(){
-        Map<String, String> config = new HashMap<>();
-        config.put("cloud_name", Const.CLOUDINARY_NAME);
-        config.put("api_key", Const.CLOUDINARY_KEY);
-        config.put("api_secret", Const.CLOUDINARY_SECRET);
-        MediaManager.init(context, config);
+    public CStorage() {
+        storageRef = FirebaseStorage.getInstance().getReference();
     }
 
     public void uploadImg(Bitmap bitmap, Listener listener){
-        String fileName = "mngTranslator-" + UUID.randomUUID().toString();
+        String fileName = "mngTranslator-" + UUID.randomUUID().toString() + ".jpg";
+        final StorageReference ref = storageRef.child("mangaTranslator/" + fileName);
 
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
 
-        MediaManager.get().upload(stream.toByteArray())
-                .unsigned(Const.CLOUDINARY_UNSIGNED)
-                .option("public_id", fileName)
-                .option("connect_timeout", Const.CLOUDINARY_CONNECT_TIMEOUT)
-                .option("read_timeout", Const.CLOUDINARY_READ_TIMEOUT)
-                .callback(new UploadCallback() {
-                    @Override
-                    public void onStart(String requestId) {
-                        Log.d(TAG, "onStart: START IMG");
-                    }
+        UploadTask uploadTask = ref.putBytes(stream.toByteArray());
+        Task<Uri> task = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @NonNull
+            @NotNull
+            @Override
+            public Task<Uri> then(@NonNull @NotNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()){
+                    throw Objects.requireNonNull(task.getException());
+                }
+                return ref.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull @NotNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    String url = task.getResult().toString();
+                    listener.success(url);
+                }
+            }
+        });
 
-                    @Override
-                    public void onProgress(String requestId, long bytes, long totalBytes) {
-
-                    }
-
-                    @Override
-                    public void onSuccess(String requestId, Map resultData) {
-                        listener.success(requestId, fileName);
-                    }
-
-                    @Override
-                    public void onError(String requestId, ErrorInfo error) {
-                        Log.d(TAG, "onError: ERROR IMG: " + error.getDescription());
-                    }
-
-                    @Override
-                    public void onReschedule(String requestId, ErrorInfo error) {
-
-                    }
-                }).dispatch();
     }
 }

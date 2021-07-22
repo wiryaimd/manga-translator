@@ -22,12 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".ui.setup.SetupActivity"
             android:parentActivityName=".ui.main.MainActivity"/>
-
-        <meta-data
-            android:name="CLOUDINARY_URL"
-            android:value="cloudinary://847429498983334:juUOHunKG1FuWEDU0t07ZlCVpLU@dsihi1kia"/>
 
     </application>
 

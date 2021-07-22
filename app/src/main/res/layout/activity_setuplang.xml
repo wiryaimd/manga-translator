@@ -5,13 +5,13 @@
     android:layout_height="match_parent"
     android:background="@color/color7">
 
-    <include layout="@layout/toolbar_setup"/>
+    <include layout="@layout/toolbar_setup" />
 
     <ScrollView
-        android:layout_below="@id/setuplang_appbar"
-        android:nestedScrollingEnabled="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/setuplang_appbar"
+        android:nestedScrollingEnabled="true">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -27,10 +27,65 @@
             </androidx.viewpager.widget.ViewPager>
 
             <LinearLayout
+                android:id="@+id/setuplang_linearengine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/setuplang_viewpager"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="6dp"
+                android:background="@drawable/custom_1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="@font/sfbold"
+                    android:text="Translate Engine"
+                    android:textSize="16sp">
+
+                </TextView>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/setuplang_engine_ondevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="12dp"
+                        android:background="@drawable/custom_2"
+                        android:fontFamily="@font/sfleague"
+                        android:padding="6dp"
+                        android:text="On Device">
+
+                    </TextView>
+
+                    <TextView
+                        android:id="@+id/setuplang_engine_api"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="12dp"
+                        android:fontFamily="@font/sfleague"
+                        android:padding="6dp"
+                        android:text="Using API (0/100)">
+
+                    </TextView>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/setuplang_lineartranslate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/setuplang_viewpager"
+                android:layout_below="@id/setuplang_linearengine"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="6dp"
                 android:layout_marginEnd="12dp"
@@ -107,39 +162,40 @@
 
             <ImageView
                 android:id="@+id/setuplang_imgalert"
-                android:visibility="gone"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_alignTop="@id/setuplang_downloadlanguages"
                 android:layout_margin="12dp"
-                android:src="@drawable/ic_alert"
                 android:layout_toStartOf="@id/setuplang_downloadlanguages"
-                android:layout_width="30dp"
-                android:layout_height="30dp">
+                android:src="@drawable/ic_alert"
+                android:visibility="gone">
 
             </ImageView>
 
             <Button
-                android:visibility="gone"
                 android:id="@+id/setuplang_downloadlanguages"
                 android:layout_width="180dp"
                 android:layout_height="50dp"
                 android:layout_below="@id/setuplang_lineartranslate"
                 android:layout_alignParentEnd="true"
-                android:fontFamily="@font/sfreguler"
                 android:layout_marginTop="6dp"
                 android:layout_marginEnd="12dp"
                 android:backgroundTint="@color/primary5"
+                android:fontFamily="@font/sfreguler"
                 android:text="Download Language Required"
-                android:textSize="12sp">
+                android:textSize="12sp"
+                android:visibility="gone">
 
             </Button>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/setuplang_recyclerview"
-                android:layout_marginTop="6dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:nestedScrollingEnabled="true"
-                android:layout_below="@id/setuplang_downloadlanguages">
+                android:layout_below="@id/setuplang_downloadlanguages"
+                android:layout_marginTop="6dp"
+                android:paddingBottom="6dp"
+                android:nestedScrollingEnabled="true">
 
             </androidx.recyclerview.widget.RecyclerView>
 
@@ -149,15 +205,15 @@
 
     <Button
         android:id="@+id/setuplang_processtranslate"
-        android:text="Process Translate"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="12dp"
-        android:layout_marginStart="32dp"
-        android:letterSpacing="0.2"
-        android:layout_marginEnd="32dp"
-        android:backgroundTint="@color/primary"
         android:layout_width="match_parent"
-        android:layout_height="55dp">
+        android:layout_height="55dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="12dp"
+        android:backgroundTint="@color/primary"
+        android:letterSpacing="0.2"
+        android:text="Process Translate">
 
     </Button>
 

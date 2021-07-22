@@ -31,8 +31,6 @@ public class SetupViewModel extends AndroidViewModel {
     private MSRecognition msRecognition;
     private GRecognition gRecognition;
 
-    private CStorage storage;
-
     public SetupViewModel(@NonNull @NotNull Application application) {
         super(application);
 
@@ -41,12 +39,6 @@ public class SetupViewModel extends AndroidViewModel {
 
         msRecognition = MSRecognition.getInstance();
         gRecognition = GRecognition.getInstance();
-
-        storage = CStorage.getInstance(getApplication());
-    }
-
-    public CStorage getStorage() {
-        return storage;
     }
 
     public GTranslate getGTranslate() {

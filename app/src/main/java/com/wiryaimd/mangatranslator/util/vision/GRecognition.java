@@ -63,12 +63,6 @@ public class GRecognition {
                 for (Text.TextBlock block : task.getResult().getTextBlocks()){
                     for (Text.Line line : block.getLines()){
                         if (line.getBoundingBox() != null) {
-                            Log.d(TAG, "onComplete: Text: " + line.getText());
-                            String msg = "left: " + line.getBoundingBox().left + "\n" + 
-                                    "top: " + line.getBoundingBox().top + "\n" +
-                                    "bottom: " + line.getBoundingBox().bottom + "\n" +
-                                    "right: " + line.getBoundingBox().right + "\n";
-                            Log.d(TAG, "onComplete: line cord: " + msg);
                             mergeList.add(new MergeLineModel(line.getText(), line.getBoundingBox()));
                         }
                     }
