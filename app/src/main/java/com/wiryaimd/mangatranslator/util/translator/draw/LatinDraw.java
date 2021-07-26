@@ -18,12 +18,15 @@ public class LatinDraw {
 
     private Paint paintBg, paintText, paintStroke;
     private float textLength, avgWidth, avgHeight, mid;
+    private float widthJapan;
 
     private MergeBlockModel textBlock;
 
     public LatinDraw(){
 
         paintBg = new Paint();
+
+        // bisa kustom box color juga yekan biar uwu
         paintBg.setColor(Color.WHITE);
 
         paintText = new Paint();
@@ -37,13 +40,13 @@ public class LatinDraw {
 
     }
 
-    public boolean update(Iterator<MergeBlockModel> block, Canvas canvas) {
+    public boolean update(Iterator<MergeBlockModel> block, Canvas canvas, boolean isJapan) {
         this.textBlock = block.next();
         Log.d(TAG, "update: textBlock: " + textBlock.getText());
 
         if (textBlock.getBoundingBox() == null){
             if (block.hasNext()) {
-                update(block, canvas);
+                update(block, canvas, isJapan);
             }else{
                 return true;
             }
@@ -54,46 +57,75 @@ public class LatinDraw {
             if (line.getRect() != null){
                 avgWidth += (line.getRect().right - line.getRect().left);
                 avgHeight += (line.getRect().bottom - line.getRect().top);
+
+                if(isJapan){
+                    avgWidthJapan = line.getRect().right - line.getRect().left;
+                    canvas.drawRect(line.getRect(), paintBg);
+                }
+
             }else{
                 countSize += 1;
             }
         }
-        canvas.drawRect(textBlock.getBoundingBox(), paintBg);
+        if (!isJapan) {
+            canvas.drawRect(textBlock.getBoundingBox(), paintBg);
+        }
         avgHeight = avgHeight / (textBlock.getLineList().size() - countSize);
         avgWidth = avgWidth / (textBlock.getLineList().size() -  countSize);
 
-        mid = (float)(textBlock.getBoundingBox().left + ((textBlock.getBoundingBox().right - textBlock.getBoundingBox().left) / 2));
+        mid = textBlock.getBoundingBox().centerX();
 
-        textLength = (avgWidth / avgHeight);
-        textLength = textLength + (float)(textLength * 0.20);
+        if (isJapan){
+            widthJapan = textBlock.getBoundingBox().right - textBlock.getBoundingBox().left;
+            widthJapan = widthJapan + (float)(widthJapan * 0.30);
+        }else{
+            textLength = (avgWidth / avgHeight);
+            textLength = textLength + (float)(textLength * 0.20);
+        }
 
         return false;
     }
 
-    public void drawTranslated(String translated, String original, Canvas canvas){
+    private float resize, avgWidthJapan;
+
+    public void drawTranslated(String translated, String original, Canvas canvas, boolean isJapan){
+        Log.d(TAG, "drawTranslated: translated: " + translated);
         if (textBlock.getBoundingBox() == null){
             return;
         }
 //        if (translated.length() > original.length()){
+        if (isJapan){
+            resize = (float)(avgWidth - (avgWidth * 0.20));
+            paintText.setTextSize(resize);
+        }else {
             paintText.setTextSize(avgHeight);
-            paintStroke.setTextSize(avgHeight);
+//            paintStroke.setTextSize(avgHeight);
+        }
 //        }else{
 //            paintText.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
 //            paintStroke.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
 //        }
 
-        float avgStroke = (float)(avgHeight * 0.02);
-        paintStroke.setStrokeWidth(avgStroke);
+//        float avgStroke = (float)(avgHeight * 0.02);
+//        paintStroke.setStrokeWidth(avgStroke);
 
         StringBuilder sb = new StringBuilder();
         String[] res = translated.split("\\s+|\\n");
 
         int countLength = 0;
         for (String str : res){
-            sb.append(str).append(" ");
-            if ((sb.length() - countLength) > textLength){
-                sb.append("\n");
-                countLength = sb.length();
+            if (!isJapan) {
+                sb.append(str).append(" ");
+                if ((sb.length() - countLength) > textLength) {
+                    sb.append("\n");
+                    countLength = sb.length();
+                }
+            }else{
+                sb.append(str).append(" ");
+                if ((sb.length() - countLength) > widthJapan) {
+                    sb.append("\n");
+                    countLength = 0;
+                }
             }
         }
 
@@ -101,7 +133,12 @@ public class LatinDraw {
         for (String draw : sb.toString().split("\\n")) {
             Log.d(TAG, "onSuccess: measure: " + paintText.measureText(draw));
             float textMid = mid - (paintText.measureText(draw) / 2);
-            float textY = textBlock.getBoundingBox().top + avgHeight + i;
+            float textY;
+            if (isJapan){
+                textY = widthJapan / avgWidth;
+            }else{
+                textY = textBlock.getBoundingBox().top + avgHeight + i;
+            }
             canvas.drawText(draw.toUpperCase(), textMid, textY, paintText);
 //            canvas.drawText(draw.toUpperCase(), textMid, textY, paintStroke);
             i += avgHeight;

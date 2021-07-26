@@ -97,6 +97,8 @@ public class ProcessDialog extends DialogFragment {
     private int countTranslate;
 
     private GRecognition gRecognition;
+    private MSRecognition msRecognition;
+
     private GTranslate gTranslate;
     private CStorage storage;
 
@@ -145,42 +147,22 @@ public class ProcessDialog extends DialogFragment {
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
 
+        gTranslate = setupViewModel.getGTranslate();
+        gTranslate.init(LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo]);
+
         if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.ENGLISH) ||
                 LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.INDONESIAN)) {
             gRecognition = setupViewModel.getGRecognition();
-            gTranslate = setupViewModel.getGTranslate();
-            gTranslate.init(LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo]);
 
             detectText();
 
         }else{
             // dooo recog mikocok
+            msRecognition = setupViewModel.getMsRecognition();
+
             Log.d(TAG, "onViewCreated: nlatin");
             detectNLatin();
         }
-    }
-
-    public void detectNLatin(){
-        checkBitmap();
-        String options = "detectOrientation=true&language=" + LanguagesData.flag_code_from[flagFrom];
-
-        storage.uploadImg(bitmap, new CStorage.Listener() {
-            @Override
-            public void success(String url) {
-                Log.d(TAG, "success: url img: " + url);
-                setupViewModel.getMsRecognition().requestDetectModel(url, options, new MSRecognition.Listener() {
-                    @Override
-                    public void success(Response response) {
-
-                    }
-
-                    @Override
-                    public List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel) {
-                        return setupViewModel.getGRecognition().merge(mergeList, mergeLineModel);
-                    }
-                });
-            }
-        });
     }
 
     public void checkBitmap(){
@@ -200,7 +182,7 @@ public class ProcessDialog extends DialogFragment {
             @Override
             public void completeDetect(Iterator<MergeBlockModel> block, Canvas canvas) {
                 // draw bg & get position
-                boolean isFinish = latinDraw.update(block, canvas);
+                boolean isFinish = latinDraw.update(block, canvas, false);
                 if (isFinish){
                     addBitmap();
                 }
@@ -210,13 +192,58 @@ public class ProcessDialog extends DialogFragment {
                     @Override
                     public void complete(String translated, String source) {
                         // draw translated
-                        latinDraw.drawTranslated(translated, source, canvas);
+                        latinDraw.drawTranslated(translated, source, canvas, false);
 
                         if (block.hasNext()) {
                             completeDetect(block, canvas);
                         }else{
                             addBitmap();
                         }
+                    }
+                });
+            }
+        });
+    }
+
+    public void detectNLatin(){
+        LatinDraw latinDraw = new LatinDraw();
+
+        checkBitmap();
+        String options = "detectOrientation=true&language=" + LanguagesData.flag_code_from[flagFrom];
+
+        Canvas canvas = new Canvas(bitmap);
+
+        storage.uploadImg(bitmap, new CStorage.Listener() {
+            @Override
+            public void success(String url) {
+                Log.d(TAG, "success: url img: " + url);
+                msRecognition.requestDetectModel(url, options, new MSRecognition.Listener() {
+                    @Override
+                    public void success(Iterator<MergeBlockModel> block) {
+                        boolean isFinish = latinDraw.update(block, canvas, true);
+                        if (isFinish){
+                            addBitmap();
+                        }
+
+                        // translate text
+                        gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
+                            @Override
+                            public void complete(String translated, String source) {
+                                // draw translated
+                                latinDraw.drawTranslated(translated, source, canvas, false);
+
+                                if (block.hasNext()) {
+                                    success(block);
+                                }else{
+                                    addBitmap();
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel) {
+                        return setupViewModel.getGRecognition().merge(mergeList, mergeLineModel);
                     }
                 });
             }

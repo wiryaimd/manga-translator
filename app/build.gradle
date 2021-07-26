@@ -49,7 +49,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-mlkit-text-recognition:16.3.0'
 
     // for japan, ch, korea text recognition
-    implementation 'com.rmtheis:tess-two:9.1.0'
+//    implementation 'com.rmtheis:tess-two:9.1.0'
 
     // translate
     implementation 'com.google.mlkit:translate:16.1.2'
