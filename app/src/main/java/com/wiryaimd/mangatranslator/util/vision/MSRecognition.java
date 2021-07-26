@@ -118,6 +118,7 @@ public class MSRecognition {
                     }
 
                     List<List<MergeLineModel>> mergeBlock = new ArrayList<>();
+                    Log.d(TAG, "onResponse: lang detect: " + detectModel.getLang());
                     if (detectModel.getLang().equalsIgnoreCase("ja")){
                         for (int i = 0; i < mergeLineList.size();) {
                             List<MergeLineModel> result = mergeJapan(mergeLineList, mergeLineList.get(i));

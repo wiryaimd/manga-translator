@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class LanguagesData {
 
-    public static String[] flag_from = {"<From>", "English", "Japanese (Manga)", "Korean (Manhwa)", "Chinese (Manhua)", "Indonesian"};
+    public static String[] flag_from = {"<From>", "English", "Japanese (Manga)", "Korean (Manhwa)", "Chinese (Simplified) (Manhua)", "Indonesian"};
 
     public static String[] flag_to = {"<To>", "Afrikaans", "Arabic", "Belarusian", "Bulgarian",
             "Bengali", "Catalan", "Czech", "Welsh",

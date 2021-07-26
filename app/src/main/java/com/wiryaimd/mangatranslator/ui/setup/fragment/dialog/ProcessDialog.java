@@ -104,6 +104,10 @@ public class ProcessDialog extends DialogFragment {
 
     private Bitmap bitmap;
 
+    private String lang;
+
+    private boolean isLatin = true;
+
     @Nullable
     @org.jetbrains.annotations.Nullable
     @Override
@@ -135,6 +139,8 @@ public class ProcessDialog extends DialogFragment {
         flagFrom = setupViewModel.getFlagFromLiveData().getValue();
         flagTo = setupViewModel.getFlagToLiveData().getValue();
         selectedList = setupViewModel.getSelectedModelLiveData().getValue();
+
+        lang = LanguagesData.flag_code_from[flagFrom];
         
         if (selectedList.size() == 0){
             return;
@@ -151,7 +157,13 @@ public class ProcessDialog extends DialogFragment {
         gTranslate.init(LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo]);
 
         if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.ENGLISH) ||
-                LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.INDONESIAN)) {
+                LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.INDONESIAN)){
+            isLatin = true;
+        }else{
+            isLatin = false;
+        }
+
+        if (isLatin) {
             gRecognition = setupViewModel.getGRecognition();
 
             detectText();
@@ -182,7 +194,7 @@ public class ProcessDialog extends DialogFragment {
             @Override
             public void completeDetect(Iterator<MergeBlockModel> block, Canvas canvas) {
                 // draw bg & get position
-                boolean isFinish = latinDraw.update(block, canvas, false);
+                boolean isFinish = latinDraw.update(block, canvas, lang);
                 if (isFinish){
                     addBitmap();
                 }
@@ -209,7 +221,10 @@ public class ProcessDialog extends DialogFragment {
         LatinDraw latinDraw = new LatinDraw();
 
         checkBitmap();
-        String options = "detectOrientation=true&language=" + LanguagesData.flag_code_from[flagFrom];
+        if (lang.equalsIgnoreCase("zh")){
+            lang = "zh-Hant";
+        }
+        String options = "detectOrientation=true&language=" + lang;
 
         Canvas canvas = new Canvas(bitmap);
 
@@ -220,7 +235,7 @@ public class ProcessDialog extends DialogFragment {
                 msRecognition.requestDetectModel(url, options, new MSRecognition.Listener() {
                     @Override
                     public void success(Iterator<MergeBlockModel> block) {
-                        boolean isFinish = latinDraw.update(block, canvas, true);
+                        boolean isFinish = latinDraw.update(block, canvas, lang);
                         if (isFinish){
                             addBitmap();
                         }
@@ -331,7 +346,11 @@ public class ProcessDialog extends DialogFragment {
 
         if (bitmapList.size() != 0){
             if (countTranslate < bitmapList.size()){
-                detectText();
+                if (isLatin){
+                    detectText();
+                }else{
+                    detectNLatin();
+                }
             }else{
 //                startActivity(intent);
                 if (getDialog() != null) getDialog().dismiss();
@@ -339,7 +358,11 @@ public class ProcessDialog extends DialogFragment {
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
         }else {
             if (countTranslate < selectedList.size()) {
-                detectText();
+                if (isLatin){
+                    detectText();
+                }else{
+                    detectNLatin();
+                }
             } else {
                 if (getDialog() != null) getDialog().dismiss();
             }
