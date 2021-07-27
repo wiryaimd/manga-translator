@@ -1,63 +1,42 @@
 package com.wiryaimd.mangatranslator.ui.setup.fragment.dialog;
 
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
-import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.Observer;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.mlkit.nl.translate.TranslateLanguage;
-import com.google.mlkit.nl.translate.Translation;
-import com.google.mlkit.nl.translate.Translator;
-import com.google.mlkit.nl.translate.TranslatorOptions;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.text.Text;
-import com.google.mlkit.vision.text.TextRecognition;
-import com.google.mlkit.vision.text.TextRecognizer;
-import com.google.mlkit.vision.text.TextRecognizerOptions;
 import com.wiryaimd.mangatranslator.R;
-import com.wiryaimd.mangatranslator.api.model.DetectModel;
-import com.wiryaimd.mangatranslator.model.ResultModel;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
 import com.wiryaimd.mangatranslator.model.merge.MergeBlockModel;
 import com.wiryaimd.mangatranslator.model.merge.MergeLineModel;
-import com.wiryaimd.mangatranslator.ui.result.ResultActivity;
-import com.wiryaimd.mangatranslator.ui.setup.SetupActivity;
+import com.wiryaimd.mangatranslator.ui.setup.fragment.ResultFragment;
 import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
 import com.wiryaimd.mangatranslator.util.RealPath;
 import com.wiryaimd.mangatranslator.util.storage.CStorage;
+import com.wiryaimd.mangatranslator.util.translator.AWSTranslate;
 import com.wiryaimd.mangatranslator.util.translator.GTranslate;
 import com.wiryaimd.mangatranslator.util.translator.draw.LatinDraw;
 import com.wiryaimd.mangatranslator.util.vision.GRecognition;
@@ -65,19 +44,12 @@ import com.wiryaimd.mangatranslator.util.vision.MSRecognition;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Executor;
-
-import okhttp3.Response;
 
 public class ProcessDialog extends DialogFragment {
 
@@ -90,16 +62,20 @@ public class ProcessDialog extends DialogFragment {
 
     private List<SelectedModel> selectedList;
     private List<Bitmap> bitmapList;
-    private ArrayList<ResultModel> resultList;
+    private ArrayList<Bitmap> resultList;
 
     private int flagFrom, flagTo;
 
     private int countTranslate;
 
+    private SetupViewModel.TranslateEngine translateEngine;
+
     private GRecognition gRecognition;
     private MSRecognition msRecognition;
 
     private GTranslate gTranslate;
+    private AWSTranslate awsTranslate;
+
     private CStorage storage;
 
     private Bitmap bitmap;
@@ -129,7 +105,12 @@ public class ProcessDialog extends DialogFragment {
         setupViewModel = new ViewModelProvider(requireActivity()).get(SetupViewModel.class);
         if (setupViewModel.getFlagFromLiveData().getValue() == null || 
                 setupViewModel.getFlagToLiveData().getValue() == null || 
-                setupViewModel.getSelectedModelLiveData().getValue() == null){
+                setupViewModel.getSelectedModelLiveData().getValue() == null ||
+                setupViewModel.getTeLiveData().getValue() == null){
+            if (getDialog() != null) {
+                getDialog().dismiss();
+                Toast.makeText(setupViewModel.getApplication(), "Failed to start translating image/pdf", Toast.LENGTH_LONG).show();
+            }
             return;
         }
         storage = new CStorage();
@@ -139,6 +120,9 @@ public class ProcessDialog extends DialogFragment {
         flagFrom = setupViewModel.getFlagFromLiveData().getValue();
         flagTo = setupViewModel.getFlagToLiveData().getValue();
         selectedList = setupViewModel.getSelectedModelLiveData().getValue();
+        translateEngine = setupViewModel.getTeLiveData().getValue();
+
+        Log.d(TAG, "onViewCreated: translate Engine: " + translateEngine.name());
 
         lang = LanguagesData.flag_code_from[flagFrom];
         
@@ -153,6 +137,7 @@ public class ProcessDialog extends DialogFragment {
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
 
+        awsTranslate = setupViewModel.getAwsTranslate();
         gTranslate = setupViewModel.getGTranslate();
         gTranslate.init(LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo]);
 
@@ -200,19 +185,37 @@ public class ProcessDialog extends DialogFragment {
                 }
 
                 // translate text
-                gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
-                    @Override
-                    public void complete(String translated, String source) {
-                        // draw translated
-                        latinDraw.drawTranslated(translated, source, canvas, false);
+                if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                    gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
+                        @Override
+                        public void complete(String translated, String source) {
+                            // draw translated
+                            Log.d(TAG, "complete: latin device translate");
+                            latinDraw.drawTranslated(translated, source, canvas, false);
 
-                        if (block.hasNext()) {
-                            completeDetect(block, canvas);
-                        }else{
-                            addBitmap();
+                            if (block.hasNext()) {
+                                completeDetect(block, canvas);
+                            } else {
+                                addBitmap();
+                            }
                         }
-                    }
-                });
+                    });
+                }else{
+                    awsTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new AWSTranslate.Listener() {
+                        @Override
+                        public void complete(String translated, String source) {
+                            Log.d(TAG, "complete: latin api translate");
+
+                            latinDraw.drawTranslated(translated, source, canvas, false);
+
+                            if (block.hasNext()) {
+                                completeDetect(block, canvas);
+                            } else {
+                                addBitmap();
+                            }
+                        }
+                    });
+                }
             }
         });
     }
@@ -241,19 +244,38 @@ public class ProcessDialog extends DialogFragment {
                         }
 
                         // translate text
-                        gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
-                            @Override
-                            public void complete(String translated, String source) {
-                                // draw translated
-                                latinDraw.drawTranslated(translated, source, canvas, false);
+                        if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                            gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
+                                @Override
+                                public void complete(String translated, String source) {
+                                    Log.d(TAG, "complete: non-latin device translate");
 
-                                if (block.hasNext()) {
-                                    success(block);
-                                }else{
-                                    addBitmap();
+                                    // draw translated
+                                    latinDraw.drawTranslated(translated, source, canvas, false);
+
+                                    if (block.hasNext()) {
+                                        success(block);
+                                    } else {
+                                        addBitmap();
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }else{
+                            awsTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new AWSTranslate.Listener() {
+                                @Override
+                                public void complete(String translated, String source) {
+                                    Log.d(TAG, "complete: non-latin api translate");
+
+                                    latinDraw.drawTranslated(translated, source, canvas, false);
+
+                                    if (block.hasNext()) {
+                                        success(block);
+                                    } else {
+                                        addBitmap();
+                                    }
+                                }
+                            });
+                        }
                     }
 
                     @Override
@@ -309,40 +331,42 @@ public class ProcessDialog extends DialogFragment {
 //            return;
 //        }
 
-        File dir = new File(Environment.getExternalStorageDirectory().toString());
-        dir.mkdirs();
-        String filename;
+        resultList.add(bitmap);
+//        bitmap.recycle();
+        Log.d(TAG, "addBitmap: boom done");
+        updateData();
 
-        if (bitmapList.size() == 0) {
-            filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
-        }else{
-            filename = "mngTranslator-" + "pdf" + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
-        }
-
-        File file = new File(dir, filename);
-        if (file.exists()){
-            file.delete();
-        }
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
-            fos.flush();
-            fos.close();
-            bitmap.recycle();
-
-            Log.d(TAG, "saveBitmap: boom bieac hahahah ihihi ahyuuu");
-            
-            updateData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        File dir = new File(Environment.getExternalStorageDirectory().toString());
+//        dir.mkdirs();
+//        String filename;
+//
+//        if (bitmapList.size() == 0) {
+//            filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+//        }else{
+//            filename = "mngTranslator-" + "pdf" + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
+//        }
+//
+//        File file = new File(dir, filename);
+//        if (file.exists()){
+//            file.delete();
+//        }
+//        try {
+//            FileOutputStream fos = new FileOutputStream(file);
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+//            fos.flush();
+//            fos.close();
+//            bitmap.recycle();
+//
+//            Log.d(TAG, "saveBitmap: boom bieac hahahah ihihi ahyuuu");
+//
+//            updateData();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void updateData(){
         countTranslate += 1;
-
-        Intent intent = new Intent(setupViewModel.getApplication(), ResultActivity.class);
-        intent.putParcelableArrayListExtra(Const.BITMAP_RESULT_LIST, resultList);
 
         if (bitmapList.size() != 0){
             if (countTranslate < bitmapList.size()){
@@ -352,7 +376,9 @@ public class ProcessDialog extends DialogFragment {
                     detectNLatin();
                 }
             }else{
-//                startActivity(intent);
+                setupViewModel.getBitmapListLiveData().setValue(resultList);
+                FragmentTransaction ft = getParentFragmentManager().beginTransaction().replace(R.id.setuplang_mainframe, new ResultFragment());
+                ft.commit();
                 if (getDialog() != null) getDialog().dismiss();
             }
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
@@ -364,6 +390,9 @@ public class ProcessDialog extends DialogFragment {
                     detectNLatin();
                 }
             } else {
+                setupViewModel.getBitmapListLiveData().setValue(resultList);
+                FragmentTransaction ft = getParentFragmentManager().beginTransaction().replace(R.id.setuplang_mainframe, new ResultFragment());
+                ft.commit();
                 if (getDialog() != null) getDialog().dismiss();
             }
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));

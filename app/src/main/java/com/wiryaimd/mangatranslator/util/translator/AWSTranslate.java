@@ -17,6 +17,10 @@ public class AWSTranslate {
 
     private AmazonTranslateAsyncClient translateAsyncClient;
 
+    public interface Listener{
+        void complete(String translated, String source);
+    }
+
     public static AWSTranslate getInstance(){
         if (instance == null){
             instance = new AWSTranslate();
@@ -42,9 +46,10 @@ public class AWSTranslate {
 
     }
 
-    public void translateText(String text, String source, String target){
+    public void translateText(String text, String source, String target, Listener listener){
+        String res = text.replaceAll("\\n", " ").replaceAll("-", " ").replaceAll("\\.", " ");
         TranslateTextRequest request = new TranslateTextRequest()
-                .withText(text)
+                .withText(res)
                 .withSourceLanguageCode(source)
                 .withTargetLanguageCode(target);
         translateAsyncClient.translateTextAsync(request, new AsyncHandler<TranslateTextRequest, TranslateTextResult>() {
@@ -57,6 +62,7 @@ public class AWSTranslate {
             public void onSuccess(TranslateTextRequest request, TranslateTextResult translateTextResult) {
                 Log.d(TAG, "onSuccess: original: " + request.getText());
                 Log.d(TAG, "onSuccess: translated: " + translateTextResult.getTranslatedText());
+                listener.complete(translateTextResult.getTranslatedText(), res);
             }
         });
     }

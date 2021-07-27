@@ -1,6 +1,7 @@
 package com.wiryaimd.mangatranslator.ui.setup;
 
 import android.app.Application;
+import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -15,6 +16,7 @@ import com.wiryaimd.mangatranslator.util.translator.AWSTranslate;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SetupViewModel extends AndroidViewModel {
@@ -24,6 +26,8 @@ public class SetupViewModel extends AndroidViewModel {
     private MutableLiveData<List<SelectedModel>> selectedModelLiveData = new MutableLiveData<>();
     private MutableLiveData<Integer> flagFromLiveData = new MutableLiveData<>();
     private MutableLiveData<Integer> flagToLiveData = new MutableLiveData<>();
+    private MutableLiveData<TranslateEngine> teLiveData = new MutableLiveData<>();
+    private MutableLiveData<ArrayList<Bitmap>> bitmapListLiveData = new MutableLiveData<>();
 
     private AWSTranslate awsTranslate;
     private GTranslate gTranslate;
@@ -31,8 +35,15 @@ public class SetupViewModel extends AndroidViewModel {
     private MSRecognition msRecognition;
     private GRecognition gRecognition;
 
+    public enum TranslateEngine{
+        ON_DEVICE,
+        USING_API
+    }
+
     public SetupViewModel(@NonNull @NotNull Application application) {
         super(application);
+
+        teLiveData.setValue(TranslateEngine.ON_DEVICE);
 
         awsTranslate = AWSTranslate.getInstance();
         gTranslate = GTranslate.getInstance();
@@ -57,8 +68,16 @@ public class SetupViewModel extends AndroidViewModel {
         return awsTranslate;
     }
 
+    public MutableLiveData<ArrayList<Bitmap>> getBitmapListLiveData() {
+        return bitmapListLiveData;
+    }
+
     public MutableLiveData<List<SelectedModel>> getSelectedModelLiveData() {
         return selectedModelLiveData;
+    }
+
+    public MutableLiveData<TranslateEngine> getTeLiveData() {
+        return teLiveData;
     }
 
     public MutableLiveData<Integer> getFlagFromLiveData() {
