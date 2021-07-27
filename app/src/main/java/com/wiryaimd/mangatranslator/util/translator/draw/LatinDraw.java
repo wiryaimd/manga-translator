@@ -73,9 +73,6 @@ public class LatinDraw {
             canvas.drawRect(textBlock.getBoundingBox(), paintBg);
         }
         avgHeight = avgHeight / (textBlock.getLineList().size() - countSize);
-        if (lang.equalsIgnoreCase("ko") || lang.equalsIgnoreCase("zh")) {
-            avgHeight = avgHeight - (float) (avgHeight * 0.55);
-        }
         avgWidth = avgWidth / (textBlock.getLineList().size() -  countSize);
 
         mid = textBlock.getBoundingBox().centerX();
@@ -86,6 +83,10 @@ public class LatinDraw {
         }else{
             textLength = (avgWidth / avgHeight);
             textLength = textLength + (float)(textLength * 0.20);
+        }
+
+        if (lang.equalsIgnoreCase("ko") || lang.equalsIgnoreCase("zh-Hant")) {
+            avgHeight = avgHeight - (float) (avgHeight * 0.50);
         }
 
         return false;

@@ -70,7 +70,7 @@ public class GRecognition {
 
                 List<List<MergeLineModel>> mergeBlock = new ArrayList<>();
                 for (int i = 0; i < mergeList.size();) {
-                    List<MergeLineModel> result = merge(mergeList, mergeList.get(i), "latin");
+                    List<MergeLineModel> result = merge(mergeList, mergeList.get(i));
                     mergeBlock.add(result);
                     mergeList.removeAll(result);
                 }
@@ -112,7 +112,7 @@ public class GRecognition {
         });
     }
 
-    public List<MergeLineModel> merge(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel, String lang){
+    public List<MergeLineModel> merge(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel){
 
         List<MergeLineModel> blockList = new ArrayList<>();
         MergeLineModel mergeHead = mergeLineModel;
@@ -137,24 +137,13 @@ public class GRecognition {
             if (isAvailableBottom) {
                 float res = mergeList.get(i).getRect().top - mergeHead.getRect().bottom;
                 float mid = mergeHead.getRect().centerX();
-                if (lang.equalsIgnoreCase("zh-Hant")){
-                    if (res > 0 - spaceHeightB &&
-                            res <= spaceHeightB &&
-                            mergeList.get(i).getRect().right > mergeHead.getRect().left &&
-                            mergeList.get(i).getRect().left - mid < mergeHead.getRect().left) {
-                        blockList.add(mergeList.get(i));
-                        mergeHead = mergeList.get(i);
-                        i = 0;
-                    }
-                }else {
-                    if (res > 0 - spaceHeightB &&
-                            res <= spaceHeightB &&
-                            mergeList.get(i).getRect().right > mid &&
-                            mergeList.get(i).getRect().left < mid) {
-                        blockList.add(mergeList.get(i));
-                        mergeHead = mergeList.get(i);
-                        i = 0;
-                    }
+                if (res > 0 - spaceHeightB &&
+                        res <= spaceHeightB &&
+                        mergeList.get(i).getRect().right > mid &&
+                        mergeList.get(i).getRect().left < mid) {
+                    blockList.add(mergeList.get(i));
+                    mergeHead = mergeList.get(i);
+                    i = 0;
                 }
             }
         }
@@ -175,24 +164,13 @@ public class GRecognition {
             if (isAvailableTop) {
                 float res = mergeHead2.getRect().top - mergeList.get(i).getRect().bottom;
                 float mid = mergeHead2.getRect().centerX();
-                if (lang.equalsIgnoreCase("zh-Hant")){
-                    if (res > 0 - spaceHeightT &&
-                            res <= spaceHeightT &&
-                            mergeList.get(i).getRect().right > mergeHead.getRect().left &&
-                            mergeList.get(i).getRect().left - mid < mergeHead.getRect().left) {
-                        blockList.add(mergeList.get(i));
-                        mergeHead = mergeList.get(i);
-                        i = 0;
-                    }
-                }else {
-                    if (res > 0 - spaceHeightT &&
-                            res <= spaceHeightT &&
-                            mergeList.get(i).getRect().right > mid &&
-                            mergeList.get(i).getRect().left < mid) {
-                        blockList.add(0, mergeList.get(i));
-                        mergeHead2 = mergeList.get(i);
-                        i = 0;
-                    }
+                if (res > 0 - spaceHeightT &&
+                        res <= spaceHeightT &&
+                        mergeList.get(i).getRect().right > mid &&
+                        mergeList.get(i).getRect().left < mid) {
+                    blockList.add(0, mergeList.get(i));
+                    mergeHead2 = mergeList.get(i);
+                    i = 0;
                 }
             }
         }

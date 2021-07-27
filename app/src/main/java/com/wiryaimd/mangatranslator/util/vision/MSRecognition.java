@@ -195,7 +195,6 @@ public class MSRecognition {
                         res <= spaceHeightL &&
                         mergeList.get(i).getRect().top < (mergeHead.getRect().top + mid) &&
                         mergeList.get(i).getRect().bottom > mergeHead.getRect().top) {
-                    Log.d(TAG, "mergeJapan: left available");
                     blockList.add(mergeList.get(i));
                     mergeHead = mergeList.get(i);
                     i = 0;
@@ -223,7 +222,6 @@ public class MSRecognition {
                         res <= spaceHeightR &&
                         mergeList.get(i).getRect().top < (mergeHead2.getRect().top + mid) &&
                         mergeList.get(i).getRect().bottom > mergeHead2.getRect().top) {
-                    Log.d(TAG, "mergeJapan: right available");
                     blockList.add(0, mergeList.get(i));
                     mergeHead2 = mergeList.get(i);
                     i = 0;
