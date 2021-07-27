@@ -258,7 +258,7 @@ public class ProcessDialog extends DialogFragment {
 
                     @Override
                     public List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel) {
-                        return setupViewModel.getGRecognition().merge(mergeList, mergeLineModel);
+                        return setupViewModel.getGRecognition().merge(mergeList, mergeLineModel, lang);
                     }
                 });
             }
