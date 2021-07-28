@@ -15,9 +15,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.adapter.ResultAdapter;
 import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
+import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.SelectSaveDialog;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +32,8 @@ public class ResultFragment extends Fragment {
     private SetupViewModel setupViewModel;
 
     private RecyclerView recyclerView;
+
+    private FloatingActionButton fabSave;
 
     private ArrayList<Bitmap> bitmapList;
 
@@ -45,6 +49,7 @@ public class ResultFragment extends Fragment {
 
         setupViewModel = new ViewModelProvider(requireActivity()).get(SetupViewModel.class);
 
+        fabSave = view.findViewById(R.id.result_fabsave);
         recyclerView = view.findViewById(R.id.result_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(setupViewModel.getApplication()));
 
@@ -60,6 +65,13 @@ public class ResultFragment extends Fragment {
         ResultAdapter adapter = new ResultAdapter(setupViewModel.getApplication());
         recyclerView.setAdapter(adapter);
         adapter.setBitmapList(bitmapList);
+
+        fabSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new SelectSaveDialog().show(getParentFragmentManager(), "SELECT_SAVE_DIALOG");
+            }
+        });
 
     }
 }

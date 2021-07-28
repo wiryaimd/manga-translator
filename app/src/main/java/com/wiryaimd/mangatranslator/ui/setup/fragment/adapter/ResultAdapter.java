@@ -42,7 +42,8 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.MyHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull ResultAdapter.MyHolder holder, int position) {
-        Glide.with(context).load(bitmapList.get(position)).into(holder.imgresult);
+//        Glide.with(context).load(bitmapList.get(position)).into(holder.imgresult);
+        holder.imgresult.setImageBitmap(bitmapList.get(position));
     }
 
     @Override

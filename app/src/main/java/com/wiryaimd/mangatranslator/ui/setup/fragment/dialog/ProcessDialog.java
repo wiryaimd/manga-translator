@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 public class ProcessDialog extends DialogFragment {
 
@@ -131,7 +132,13 @@ public class ProcessDialog extends DialogFragment {
         }
 
         if (selectedList.get(0).getType() == SelectedModel.Type.PDF) {
-            bitmapList = loadBitmapList();
+            bitmapList = setupViewModel.getPdfListLiveData().getValue();
+            if (bitmapList == null || bitmapList.size() == 0){
+                Log.d(TAG, "onViewCreated: cant read pdf file");
+                Toast.makeText(setupViewModel.getApplication(), "Cannot read pdf file", Toast.LENGTH_SHORT).show();
+                if (getDialog() != null) getDialog().dismiss();
+                return;
+            }
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
         }else{
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
@@ -287,82 +294,11 @@ public class ProcessDialog extends DialogFragment {
         });
     }
 
-    public List<Bitmap> loadBitmapList(){
-        List<Bitmap> bitmapList = new ArrayList<>();
-        try {
-            File file = RealPath.from(setupViewModel.getApplication(), selectedList.get(0).getUri());
-            PdfRenderer pdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY));
-            Bitmap bitmap;
-            Log.d(TAG, "onActivityResult: count: " + pdfRenderer.getPageCount());
-            for (int i = 0; i < pdfRenderer.getPageCount(); i++) {
-                PdfRenderer.Page page = pdfRenderer.openPage(i);
-                int width = getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
-                int height = getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
-                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                canvas.drawColor(Color.WHITE);
-                canvas.drawBitmap(bitmap, 0, 0, null);
-                Rect r = new Rect(0, 0, width, height);
-                page.render(bitmap, r, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT);
-                bitmapList.add(bitmap);
-                page.close();
-            }
-            pdfRenderer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, "loadBitmapList: uwu crot");
-        return bitmapList;
-    }
-
     public void addBitmap(){
-//        if (bitmapList.size() != 0) {
-//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
-//            resultList.add(new ResultModel(stream.toByteArray()));
-//
-//            try {
-//                stream.flush();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            updateData();
-//            return;
-//        }
-
         resultList.add(bitmap);
 //        bitmap.recycle();
         Log.d(TAG, "addBitmap: boom done");
         updateData();
-
-//        File dir = new File(Environment.getExternalStorageDirectory().toString());
-//        dir.mkdirs();
-//        String filename;
-//
-//        if (bitmapList.size() == 0) {
-//            filename = "mngTranslator-" + selectedList.get(countTranslate).getName() + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
-//        }else{
-//            filename = "mngTranslator-" + "pdf" + "(" + countTranslate + ")" + UUID.randomUUID().toString() + ".jpg";
-//        }
-//
-//        File file = new File(dir, filename);
-//        if (file.exists()){
-//            file.delete();
-//        }
-//        try {
-//            FileOutputStream fos = new FileOutputStream(file);
-//            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
-//            fos.flush();
-//            fos.close();
-//            bitmap.recycle();
-//
-//            Log.d(TAG, "saveBitmap: boom bieac hahahah ihihi ahyuuu");
-//
-//            updateData();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void updateData(){

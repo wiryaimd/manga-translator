@@ -1,7 +1,12 @@
 package com.wiryaimd.mangatranslator.ui.setup.fragment;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.pdf.PdfRenderer;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,15 +42,23 @@ import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
 import com.wiryaimd.mangatranslator.ui.setup.adapter.InfoAdapter;
 import com.wiryaimd.mangatranslator.ui.setup.adapter.SelectAdapter;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.InfoDialog;
+import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.LoadPDFDialog;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.ProcessDialog;
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
+import com.wiryaimd.mangatranslator.util.RealPath;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class ProcessFragment extends Fragment {
 
@@ -104,7 +117,7 @@ public class ProcessFragment extends Fragment {
         setupViewModel = new ViewModelProvider(requireActivity()).get(SetupViewModel.class);
 
         selectedList = setupViewModel.getSelectedModelLiveData().getValue();
-        if (selectedList == null || selectedList.size() == 0){
+        if (selectedList == null || selectedList.size() == 0) {
             requireActivity().finish();
             Toast.makeText(setupViewModel.getApplication(), "Cannot find data on fragment", Toast.LENGTH_SHORT).show();
             return;
@@ -131,27 +144,29 @@ public class ProcessFragment extends Fragment {
         remoteModelManager = RemoteModelManager.getInstance();
         downloadConditions = new DownloadConditions.Builder().build();
 
-        remoteModelManager.getDownloadedModels(TranslateRemoteModel.class).addOnSuccessListener(new OnSuccessListener<Set<TranslateRemoteModel>>() {
-            @Override
-            public void onSuccess(@NonNull @NotNull Set<TranslateRemoteModel> translateRemoteModels) {
-                for (TranslateRemoteModel model : translateRemoteModels){
-                    downloadedList.add(model.getLanguage());
-                    Log.d(TAG, "onSuccess: lang: " + model.getLanguage());
-                }
-            }
-        });
+        updateDownloadedModels();
 
         setupViewModel.getFlagFromLiveData().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
                 checkRequireDownload(integer, 0);
-                if (!downloadedFrom || !downloadedTo){
-                    btnrequire.setVisibility(View.VISIBLE);
-                    imgalert.setVisibility(View.VISIBLE);
-                }else{
-                    btnrequire.setVisibility(View.GONE);
-                    imgalert.setVisibility(View.GONE);
-                }
+                setupViewModel.getTeLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.TranslateEngine>() {
+                    @Override
+                    public void onChanged(SetupViewModel.TranslateEngine translateEngine) {
+                        if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                            if (!downloadedFrom || !downloadedTo) {
+                                btnrequire.setVisibility(View.VISIBLE);
+                                imgalert.setVisibility(View.VISIBLE);
+                            } else {
+                                btnrequire.setVisibility(View.GONE);
+                                imgalert.setVisibility(View.GONE);
+                            }
+                        } else {
+                            btnrequire.setVisibility(View.GONE);
+                            imgalert.setVisibility(View.GONE);
+                        }
+                    }
+                });
             }
         });
 
@@ -159,13 +174,23 @@ public class ProcessFragment extends Fragment {
             @Override
             public void onChanged(Integer integer) {
                 checkRequireDownload(integer, 1);
-                if (!downloadedFrom || !downloadedTo){
-                    btnrequire.setVisibility(View.VISIBLE);
-                    imgalert.setVisibility(View.VISIBLE);
-                }else{
-                    btnrequire.setVisibility(View.GONE);
-                    imgalert.setVisibility(View.GONE);
-                }
+                setupViewModel.getTeLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.TranslateEngine>() {
+                    @Override
+                    public void onChanged(SetupViewModel.TranslateEngine translateEngine) {
+                        if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                            if (!downloadedFrom || !downloadedTo) {
+                                btnrequire.setVisibility(View.VISIBLE);
+                                imgalert.setVisibility(View.VISIBLE);
+                            } else {
+                                btnrequire.setVisibility(View.GONE);
+                                imgalert.setVisibility(View.GONE);
+                            }
+                        } else {
+                            btnrequire.setVisibility(View.GONE);
+                            imgalert.setVisibility(View.GONE);
+                        }
+                    }
+                });
             }
         });
 
@@ -198,7 +223,7 @@ public class ProcessFragment extends Fragment {
         tvondevice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.ON_DEVICE);;
+                setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.ON_DEVICE);
                 tvondevice.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
                 tvusingapi.setBackgroundColor(Color.WHITE);
             }
@@ -207,7 +232,7 @@ public class ProcessFragment extends Fragment {
         tvusingapi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.USING_API);;
+                setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.USING_API);
                 tvusingapi.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
                 tvondevice.setBackgroundColor(Color.WHITE);
             }
@@ -219,15 +244,31 @@ public class ProcessFragment extends Fragment {
                 if (setupViewModel.getFlagFromLiveData().getValue() == null ||
                         setupViewModel.getFlagToLiveData().getValue() == null ||
                         setupViewModel.getFlagFromLiveData().getValue() == 0 ||
-                        setupViewModel.getFlagToLiveData().getValue() == 0){
+                        setupViewModel.getFlagToLiveData().getValue() == 0) {
                     Toast.makeText(setupViewModel.getApplication(), "Please select languages", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if (downloadedFrom && downloadedTo){
-                    new ProcessDialog().show(getParentFragmentManager(), "PROCESS_FRAGMENT_SETUP");
-                }else {
-                    new InfoDialog("Download Language Required", "You will download required language before start translating", false);
+                if (selectedList.get(0).getType() == SelectedModel.Type.IMAGE) {
+                    if (setupViewModel.getTeLiveData().getValue() == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                        if (downloadedFrom && downloadedTo) {
+                            new ProcessDialog().show(getParentFragmentManager(), "PROCESS_FRAGMENT_SETUP");
+                        } else {
+                            new InfoDialog("Download Language Required", "You will download required language before start translating", false);
+                        }
+                    } else {
+                        new ProcessDialog().show(getParentFragmentManager(), "PROCESS_FRAGMENT_SETUP_API");
+                    }
+                } else {
+                    if (setupViewModel.getTeLiveData().getValue() == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                        if (downloadedFrom && downloadedTo) {
+                            new LoadPDFDialog(selectedList.get(0).getUri(), new ArrayList<>()).show(getParentFragmentManager(), "LOAD_PDF_DIALOG");
+                        } else {
+                            new InfoDialog("Download Language Required", "You will download required language before start translating", false);
+                        }
+                    } else {
+                        new LoadPDFDialog(selectedList.get(0).getUri(), new ArrayList<>()).show(getParentFragmentManager(), "LOAD_PDF_DIALOG_API");
+                    }
                 }
             }
         });
@@ -235,40 +276,45 @@ public class ProcessFragment extends Fragment {
         btnrequire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (flagTo == 0 && flagFrom == 0){
+                if (flagTo == 0 && flagFrom == 0) {
+                    Toast.makeText(setupViewModel.getApplication(), "Please select language", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 sucFrom = false;
-                sucTo =  false;
+                sucTo = false;
 
-                btnprocess.setEnabled(false);
+                btnprocess.setVisibility(View.GONE);
                 imgalert.setVisibility(View.GONE);
                 loading.setVisibility(View.VISIBLE);
 
-                if (flagFrom == flagTo && !downloadedFrom){
+                if (flagFrom == flagTo && !downloadedFrom) {
 
                     translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_from[flagFrom]).build();
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
+                            btnprocess.setVisibility(View.VISIBLE);
                             btnrequire.setVisibility(View.GONE);
                             loading.setVisibility(View.GONE);
                             btnprocess.setEnabled(true);
+                            updateDownloadedModels();
                         }
                     });
                     return;
                 }
 
-                if (!downloadedFrom && !downloadedTo){
+                if (!downloadedFrom && !downloadedTo) {
                     translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_from[flagFrom]).build();
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
                             sucFrom = true;
-                            if (sucFrom && sucTo){
+                            if (sucFrom && sucTo) {
+                                btnprocess.setVisibility(View.VISIBLE);
                                 btnrequire.setVisibility(View.GONE);
                                 loading.setVisibility(View.GONE);
                                 btnprocess.setEnabled(true);
+                                updateDownloadedModels();
                             }
                         }
                     });
@@ -277,31 +323,37 @@ public class ProcessFragment extends Fragment {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
                             sucTo = true;
-                            if (sucFrom && sucTo){
+                            if (sucFrom && sucTo) {
+                                btnprocess.setVisibility(View.VISIBLE);
                                 btnrequire.setVisibility(View.GONE);
                                 loading.setVisibility(View.GONE);
                                 btnprocess.setEnabled(true);
+                                updateDownloadedModels();
                             }
                         }
                     });
-                }else if(!downloadedFrom && flagFrom != 0){
+                } else if (!downloadedFrom && flagFrom != 0) {
                     translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_from[flagFrom]).build();
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
+                            btnprocess.setVisibility(View.VISIBLE);
                             btnrequire.setVisibility(View.GONE);
                             loading.setVisibility(View.GONE);
                             btnprocess.setEnabled(true);
+                            updateDownloadedModels();
                         }
                     });
-                }else if(!downloadedTo && flagTo != 0){
+                } else if (!downloadedTo && flagTo != 0) {
                     translateRemoteModel = new TranslateRemoteModel.Builder(LanguagesData.flag_id_to[flagTo]).build();
                     remoteModelManager.download(translateRemoteModel, downloadConditions).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(@NonNull @NotNull Void unused) {
+                            btnprocess.setVisibility(View.VISIBLE);
                             btnrequire.setVisibility(View.GONE);
                             loading.setVisibility(View.GONE);
                             btnprocess.setEnabled(true);
+                            updateDownloadedModels();
                         }
                     });
                 }
@@ -310,12 +362,25 @@ public class ProcessFragment extends Fragment {
 
     }
 
-    public void checkRequireDownload(int pos, int type){
+    private void updateDownloadedModels() {
+        downloadedList.clear();
+        remoteModelManager.getDownloadedModels(TranslateRemoteModel.class).addOnSuccessListener(new OnSuccessListener<Set<TranslateRemoteModel>>() {
+            @Override
+            public void onSuccess(@NonNull @NotNull Set<TranslateRemoteModel> translateRemoteModels) {
+                for (TranslateRemoteModel model : translateRemoteModels) {
+                    downloadedList.add(model.getLanguage());
+                    Log.d(TAG, "onSuccess: lang: " + model.getLanguage());
+                }
+            }
+        });
+    }
 
-        if (pos == 0 && type == 0){
+    public void checkRequireDownload(int pos, int type) {
+
+        if (pos == 0 && type == 0) {
             downloadedFrom = true;
             return;
-        }else if(pos == 0 && type == 1){
+        } else if (pos == 0 && type == 1) {
             downloadedTo = true;
             return;
         }
@@ -323,7 +388,7 @@ public class ProcessFragment extends Fragment {
         String data;
         if (type == 0) {
             data = LanguagesData.flag_code_from[pos];
-        } else{
+        } else {
             data = LanguagesData.flag_code[pos];
         }
 
@@ -340,7 +405,7 @@ public class ProcessFragment extends Fragment {
 
         if (type == 0) {
             downloadedFrom = false;
-        }else {
+        } else {
             downloadedTo = false;
         }
     }

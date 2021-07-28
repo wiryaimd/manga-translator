@@ -28,6 +28,7 @@ public class SetupViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> flagToLiveData = new MutableLiveData<>();
     private MutableLiveData<TranslateEngine> teLiveData = new MutableLiveData<>();
     private MutableLiveData<ArrayList<Bitmap>> bitmapListLiveData = new MutableLiveData<>();
+    private MutableLiveData<ArrayList<Bitmap>> pdfListLiveData = new MutableLiveData<>();
 
     private AWSTranslate awsTranslate;
     private GTranslate gTranslate;
@@ -70,6 +71,10 @@ public class SetupViewModel extends AndroidViewModel {
 
     public MutableLiveData<ArrayList<Bitmap>> getBitmapListLiveData() {
         return bitmapListLiveData;
+    }
+
+    public MutableLiveData<ArrayList<Bitmap>> getPdfListLiveData() {
+        return pdfListLiveData;
     }
 
     public MutableLiveData<List<SelectedModel>> getSelectedModelLiveData() {
