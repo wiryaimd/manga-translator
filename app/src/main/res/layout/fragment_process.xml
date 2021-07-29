@@ -22,56 +22,132 @@
             </androidx.viewpager.widget.ViewPager>
 
             <LinearLayout
-                android:id="@+id/processlang_linearengine"
-                android:layout_width="wrap_content"
+                android:id="@+id/processlang_enginelinear"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/processlang_viewpager"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginBottom="6dp"
-                android:background="@drawable/custom_1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="6dp"
-                    android:fontFamily="@font/sfbold"
-                    android:text="Translate Engine"
-                    android:textSize="16sp">
-
-                </TextView>
+                android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/processlang_engine_translate_linear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_below="@id/processlang_viewpager"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/custom_1"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/processlang_engine_ondevice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="12dp"
-                        android:background="@drawable/custom_2"
-                        android:fontFamily="@font/sfleague"
-                        android:padding="6dp"
-                        android:text="On Device">
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/sfbold"
+                        android:text="Translate Engine"
+                        android:textSize="16sp">
 
                     </TextView>
 
-                    <TextView
-                        android:id="@+id/processlang_engine_api"
-                        android:background="@color/white"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="12dp"
-                        android:fontFamily="@font/sfleague"
-                        android:padding="6dp"
-                        android:text="Using API (0/100)">
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/processlang_engine_ondevice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="12dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/custom_2"
+                            android:fontFamily="@font/sfleague"
+                            android:padding="6dp"
+                            android:text="On Device"
+                            android:textSize="12sp">
+
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/processlang_engine_api"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="12dp"
+                            android:layout_weight="1"
+                            android:background="@color/white"
+                            android:fontFamily="@font/sfleague"
+                            android:padding="6dp"
+                            android:text="Using API"
+                            android:textSize="12sp">
+
+                        </TextView>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/processlang_engine_detecttext_linear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/processlang_viewpager"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginBottom="6dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/custom_1"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="6dp"
+                        android:fontFamily="@font/sfbold"
+                        android:text="Detect Text Engine"
+                        android:textSize="16sp">
 
                     </TextView>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/processlang_engine_detecttext_ondevice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="12dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/custom_2"
+                            android:fontFamily="@font/sfleague"
+                            android:padding="6dp"
+                            android:text="On Device"
+                            android:textSize="12sp">
+
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/processlang_engine_detecttext_api"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="12dp"
+                            android:layout_weight="1"
+                            android:background="@color/white"
+                            android:fontFamily="@font/sfleague"
+                            android:padding="6dp"
+                            android:text="Using API"
+                            android:textSize="12sp">
+
+                        </TextView>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -81,7 +157,7 @@
                 android:id="@+id/processlang_lineartranslate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/processlang_linearengine"
+                android:layout_below="@id/processlang_enginelinear"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="6dp"
                 android:layout_marginEnd="12dp"
@@ -90,7 +166,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
+                    android:layout_marginEnd="6dp"
                     android:layout_weight="1"
                     android:background="@drawable/custom_1"
                     android:orientation="vertical"
@@ -118,7 +194,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     android:background="@drawable/custom_1"
                     android:orientation="vertical"
@@ -184,14 +260,29 @@
 
             </Button>
 
+            <TextView
+                android:id="@+id/processlang_processcount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/processlang_downloadlanguages"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="6dp"
+                android:fontFamily="@font/sfleague"
+                android:text="Image will process (1)"
+                android:textSize="14sp">
+
+            </TextView>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/processlang_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/processlang_downloadlanguages"
+                android:layout_below="@id/processlang_processcount"
                 android:layout_marginTop="6dp"
-                android:paddingBottom="6dp"
-                android:nestedScrollingEnabled="true">
+                android:nestedScrollingEnabled="true"
+                android:paddingBottom="6dp">
 
             </androidx.recyclerview.widget.RecyclerView>
 

@@ -96,8 +96,11 @@ public class LoadPDFDialog extends DialogFragment {
                         }
                         PdfRenderer.Page page = pdfRenderer.openPage(i);
 
-                        int width = getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
-                        int height = getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
+                        Log.d(TAG, "run: width page: " + page.getWidth());
+                        Log.d(TAG, "run: height page: " + page.getHeight());
+                        int width = page.getWidth();
+                        int height = page.getHeight();
+
                         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
                         Canvas canvas = new Canvas(bitmap);

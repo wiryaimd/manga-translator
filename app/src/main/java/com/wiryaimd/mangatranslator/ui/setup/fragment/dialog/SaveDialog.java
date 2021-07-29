@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.wiryaimd.mangatranslator.R;
@@ -30,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 public class SaveDialog extends DialogFragment {
 
@@ -38,6 +40,9 @@ public class SaveDialog extends DialogFragment {
     private SetupViewModel setupViewModel;
     
     private ArrayList<Bitmap> bitmapList;
+
+    public static final int CODE_SUCCESS = 10;
+    public static final int CODE_ERROR = 1;
 
     private SelectedModel.Type type;
 
@@ -68,59 +73,66 @@ public class SaveDialog extends DialogFragment {
         }
         
         if (type == SelectedModel.Type.IMAGE){
-            try {
-                saveImage(0);
-            } catch (IOException e) {
-                Toast.makeText(setupViewModel.getApplication(), "Cannot save bitmap, idk why", Toast.LENGTH_SHORT).show();
-            }
+            Executors.newSingleThreadExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        saveImage(0);
+                    } catch (IOException e) {
+                        setupViewModel.getSaveCodeLiveData().postValue(1);
+                    }
+                }
+            });
         }else{
             savePdf();
         }
+
+        setupViewModel.getSaveCodeLiveData().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                if (integer == CODE_SUCCESS){
+                    setupViewModel.getSaveCodeLiveData().setValue(0);
+
+                    Toast.makeText(setupViewModel.getApplication(), "Saved!", Toast.LENGTH_SHORT).show();
+                    if (getDialog() != null) getDialog().dismiss();
+                }else if(integer == CODE_ERROR){
+                    Toast.makeText(setupViewModel.getApplication(), "Cannot save image, idk why", Toast.LENGTH_SHORT).show();
+                    if (getDialog() != null) getDialog().dismiss();
+                }
+            }
+        });
     }
 
     public void savePdf(){
-        int maxWidth = 0, maxHeight = 0;
-
-        Paint paint = new Paint();
-        paint.setColor(Color.WHITE);
-
-        for (int i = 0; i < bitmapList.size(); i++) {
-            if (bitmapList.get(i).getWidth() > maxWidth){
-                maxWidth = bitmapList.get(i).getWidth();
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                PdfDocument pdfDocument = new PdfDocument();
+                saveBitmap(pdfDocument, 0);
             }
-            if (bitmapList.get(i).getHeight() > maxHeight){
-                maxHeight = bitmapList.get(i).getHeight();
-            }
-        }
+        });
+    }
 
-        PdfDocument pdfDocument = new PdfDocument();
-        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(maxWidth, maxHeight, bitmapList.size()).create();
+    public void saveBitmap(PdfDocument pdfDocument, int index){
+
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(bitmapList.get(index).getWidth(), bitmapList.get(index).getHeight(), 1).create();
 
         PdfDocument.Page page = pdfDocument.startPage(pageInfo);
         Canvas canvas = page.getCanvas();
-        canvas.drawPaint(paint);
 
-        saveBitmap(pdfDocument, page, canvas, 0, maxHeight);
-    }
+        canvas.drawBitmap(bitmapList.get(index), 0, 0, null);
+        pdfDocument.finishPage(page);
 
-    public void saveBitmap(PdfDocument pdfDocument, PdfDocument.Page page, Canvas canvas, int index, int maxHeight){
-        int currentHeight = 0;
-        for (int i = 0; i < index; i++) {
-            currentHeight += maxHeight;
-        }
-        canvas.drawBitmap(bitmapList.get(index), 0, currentHeight, null);
+        bitmapList.get(index).recycle();
 
         if ((index + 1) < bitmapList.size()){
-            saveBitmap(pdfDocument, page, canvas, (index + 1), maxHeight);
+            saveBitmap(pdfDocument, (index + 1));
         }else{
-
-            pdfDocument.finishPage(page);
-
-            File dir = new File(Environment.getExternalStorageDirectory().toString() + "/MangaTranslator");
+            File dir = new File(Environment.getExternalStorageDirectory().toString() + "/MangaTranslator/pdf");
             dir.mkdirs();
             String filename;
 
-            filename = "mngTranslator-PDF-" + UUID.randomUUID().toString() + "(" + index + ")"  + ".pdf";
+            filename = "mngTranslator-PDF-" + UUID.randomUUID().toString() + ".pdf";
 
             File file = new File(dir, filename);
             if (file.exists()){
@@ -137,36 +149,35 @@ public class SaveDialog extends DialogFragment {
 
             pdfDocument.close();
 
-            Toast.makeText(setupViewModel.getApplication(), "PDF Saved!", Toast.LENGTH_SHORT).show();
-            if (getDialog() != null) getDialog().dismiss();
+            setupViewModel.getSaveCodeLiveData().postValue(CODE_SUCCESS);
         }
     }
     
     public void saveImage(int index) throws IOException {
-        File dir = new File(Environment.getExternalStorageDirectory().toString() + "/MangaTranslator");
+        File dir = new File(Environment.getExternalStorageDirectory().toString());
         dir.mkdirs();
         String filename;
-        
+
         filename = "mngTranslator-IMG-" + UUID.randomUUID().toString() + "(" + index + ")"  + ".jpg";
 
         File file = new File(dir, filename);
         if (file.exists()){
             file.delete();
         }
-        
+
         FileOutputStream fos = new FileOutputStream(file);
         bitmapList.get(index).compress(Bitmap.CompressFormat.JPEG, 90, fos);
         fos.flush();
         fos.close();
-//        bitmapList.get(index).recycle();
+
+        bitmapList.get(index).recycle();
 
         Log.d(TAG, "saveBitmap: boom bieac hahahah ihihi ahyuuu + " + index);
 
         if ((index + 1) < bitmapList.size()){
             saveImage((index + 1));
         }else{
-            Toast.makeText(setupViewModel.getApplication(), "Image Saved!", Toast.LENGTH_SHORT).show();
-            if (getDialog() != null) getDialog().dismiss();
+            setupViewModel.getSaveCodeLiveData().postValue(CODE_SUCCESS);
         }
         
     }

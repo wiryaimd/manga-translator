@@ -70,6 +70,7 @@ public class ProcessDialog extends DialogFragment {
     private int countTranslate;
 
     private SetupViewModel.TranslateEngine translateEngine;
+    private SetupViewModel.OCREngine ocrEngine;
 
     private GRecognition gRecognition;
     private MSRecognition msRecognition;
@@ -107,7 +108,8 @@ public class ProcessDialog extends DialogFragment {
         if (setupViewModel.getFlagFromLiveData().getValue() == null || 
                 setupViewModel.getFlagToLiveData().getValue() == null || 
                 setupViewModel.getSelectedModelLiveData().getValue() == null ||
-                setupViewModel.getTeLiveData().getValue() == null){
+                setupViewModel.getTeLiveData().getValue() == null ||
+                setupViewModel.getOcrLiveData().getValue() == null){
             if (getDialog() != null) {
                 getDialog().dismiss();
                 Toast.makeText(setupViewModel.getApplication(), "Failed to start translating image/pdf", Toast.LENGTH_LONG).show();
@@ -122,6 +124,7 @@ public class ProcessDialog extends DialogFragment {
         flagTo = setupViewModel.getFlagToLiveData().getValue();
         selectedList = setupViewModel.getSelectedModelLiveData().getValue();
         translateEngine = setupViewModel.getTeLiveData().getValue();
+        ocrEngine = setupViewModel.getOcrLiveData().getValue();
 
         Log.d(TAG, "onViewCreated: translate Engine: " + translateEngine.name());
 
@@ -303,10 +306,12 @@ public class ProcessDialog extends DialogFragment {
 
     public void updateData(){
         countTranslate += 1;
-
+        Log.d(TAG, "updateData: woeeeee first");
         if (bitmapList.size() != 0){
+            Log.d(TAG, "updateData: lahhhh bitmap");
             if (countTranslate < bitmapList.size()){
                 if (isLatin){
+                    Log.d(TAG, "updateData: hehhh");
                     detectText();
                 }else{
                     detectNLatin();
@@ -319,13 +324,17 @@ public class ProcessDialog extends DialogFragment {
             }
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
         }else {
+            Log.d(TAG, "updateData: else img");
             if (countTranslate < selectedList.size()) {
+                Log.d(TAG, "updateData: img cekkkk");
                 if (isLatin){
+                    Log.d(TAG, "updateData: yayayaya latin");
                     detectText();
                 }else{
                     detectNLatin();
                 }
             } else {
+                Log.d(TAG, "updateData: nihh gw disini mamank");
                 setupViewModel.getBitmapListLiveData().setValue(resultList);
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction().replace(R.id.setuplang_mainframe, new ResultFragment());
                 ft.commit();
@@ -333,6 +342,7 @@ public class ProcessDialog extends DialogFragment {
             }
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
+        Log.d(TAG, "updateData: gangerti lagi");
     }
 
     public Bitmap loadBitmap(Uri uri){

@@ -48,8 +48,9 @@ public class AWSTranslate {
 
     public void translateText(String text, String source, String target, Listener listener){
         String res = text.replaceAll("\\n", " ").replaceAll("-", " ").replaceAll("\\.", " ");
+
         TranslateTextRequest request = new TranslateTextRequest()
-                .withText(res)
+                .withText(res.toLowerCase())
                 .withSourceLanguageCode(source)
                 .withTargetLanguageCode(target);
         translateAsyncClient.translateTextAsync(request, new AsyncHandler<TranslateTextRequest, TranslateTextResult>() {

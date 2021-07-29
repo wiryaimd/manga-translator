@@ -27,8 +27,13 @@ public class SetupViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> flagFromLiveData = new MutableLiveData<>();
     private MutableLiveData<Integer> flagToLiveData = new MutableLiveData<>();
     private MutableLiveData<TranslateEngine> teLiveData = new MutableLiveData<>();
+    private MutableLiveData<OCREngine> ocrLiveData = new MutableLiveData<>();
     private MutableLiveData<ArrayList<Bitmap>> bitmapListLiveData = new MutableLiveData<>();
     private MutableLiveData<ArrayList<Bitmap>> pdfListLiveData = new MutableLiveData<>();
+    private MutableLiveData<Integer> saveCodeLiveData = new MutableLiveData<>();
+
+    private Boolean availableAws = false;
+    private Boolean availableMicrosoft = false;
 
     private AWSTranslate awsTranslate;
     private GTranslate gTranslate;
@@ -41,10 +46,17 @@ public class SetupViewModel extends AndroidViewModel {
         USING_API
     }
 
+    public enum OCREngine{
+        ON_DEVICE,
+        USING_API
+    }
+
     public SetupViewModel(@NonNull @NotNull Application application) {
         super(application);
 
         teLiveData.setValue(TranslateEngine.ON_DEVICE);
+        ocrLiveData.setValue(OCREngine.ON_DEVICE);
+        saveCodeLiveData.setValue(0);
 
         awsTranslate = AWSTranslate.getInstance();
         gTranslate = GTranslate.getInstance();
@@ -69,6 +81,10 @@ public class SetupViewModel extends AndroidViewModel {
         return awsTranslate;
     }
 
+    public MutableLiveData<Integer> getSaveCodeLiveData() {
+        return saveCodeLiveData;
+    }
+
     public MutableLiveData<ArrayList<Bitmap>> getBitmapListLiveData() {
         return bitmapListLiveData;
     }
@@ -81,6 +97,10 @@ public class SetupViewModel extends AndroidViewModel {
         return selectedModelLiveData;
     }
 
+    public MutableLiveData<OCREngine> getOcrLiveData() {
+        return ocrLiveData;
+    }
+
     public MutableLiveData<TranslateEngine> getTeLiveData() {
         return teLiveData;
     }
@@ -91,5 +111,21 @@ public class SetupViewModel extends AndroidViewModel {
 
     public MutableLiveData<Integer> getFlagToLiveData() {
         return flagToLiveData;
+    }
+
+    public Boolean getAvailableAws() {
+        return availableAws;
+    }
+
+    public Boolean getAvailableMicrosoft() {
+        return availableMicrosoft;
+    }
+
+    public void setAvailableAws(Boolean availableAws) {
+        this.availableAws = availableAws;
+    }
+
+    public void setAvailableMicrosoft(Boolean availableMicrosoft) {
+        this.availableMicrosoft = availableMicrosoft;
     }
 }

@@ -34,16 +34,15 @@ public class InfoDialog extends DialogFragment {
     @Override
     public View onCreateView(@NonNull @NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         if (getDialog() != null) getDialog().requestWindowFeature(STYLE_NO_TITLE);
-        return inflater.inflate(R.layout.item_info, container, false);
+        return inflater.inflate(R.layout.dialog_info, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
-        tvtitle = view.findViewById(R.id.info_item_title);
-        tvdesc = view.findViewById(R.id.info_item_desc);
-        btnok = view.findViewById(R.id.info_item_ok);
-        btnok.setVisibility(View.VISIBLE);
+        tvtitle = view.findViewById(R.id.infodialog_item_title);
+        tvdesc = view.findViewById(R.id.infodialog_item_desc);
+        btnok = view.findViewById(R.id.infodialog_item_ok);
 
         tvtitle.setText(title);
         tvdesc.setText(message);

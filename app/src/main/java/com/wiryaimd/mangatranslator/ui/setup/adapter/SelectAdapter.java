@@ -1,5 +1,6 @@
 package com.wiryaimd.mangatranslator.ui.setup.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
 
@@ -21,7 +23,10 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.MyHolder> 
 
     private List<SelectedModel> selectedList = new ArrayList<>();
 
-    public void setSelectedList(List<SelectedModel> selectedList){
+    private Context context;
+
+    public void setSelectedList(Context context, List<SelectedModel> selectedList){
+        this.context = context;
         this.selectedList = selectedList;
         notifyDataSetChanged();
     }
@@ -38,12 +43,10 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.MyHolder> 
     public void onBindViewHolder(@NonNull @NotNull SelectAdapter.MyHolder holder, int position) {
         SelectedModel selectedModel = selectedList.get(position);
 
-        holder.tvtitle.setText(selectedModel.getName());
-
         if (selectedModel.getType() == SelectedModel.Type.IMAGE){
-
+            Glide.with(context).load(selectedModel.getUri()).into(holder.imgsrc);
         }else{
-
+            Glide.with(context).load(R.drawable.ic_pdf).into(holder.imgsrc);
         }
     }
 
@@ -54,14 +57,12 @@ public class SelectAdapter extends RecyclerView.Adapter<SelectAdapter.MyHolder> 
 
     public class MyHolder extends RecyclerView.ViewHolder {
 
-        public ImageView imgtype;
-        public TextView tvtitle;
+        public ImageView imgsrc;
 
         public MyHolder(@NonNull @NotNull View itemView) {
             super(itemView);
 
-            tvtitle = itemView.findViewById(R.id.selectedfile_name);
-            imgtype = itemView.findViewById(R.id.selectedfile_type);
+            imgsrc = itemView.findViewById(R.id.selectedfile_src);
 
         }
 

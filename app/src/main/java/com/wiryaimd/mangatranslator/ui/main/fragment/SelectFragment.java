@@ -9,14 +9,18 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.wiryaimd.mangatranslator.R;
+import com.wiryaimd.mangatranslator.ui.main.MainViewModel;
 import com.wiryaimd.mangatranslator.ui.main.fragment.dialog.SelectDialog;
 import com.wiryaimd.mangatranslator.util.PermissionHelper;
 
 import org.jetbrains.annotations.NotNull;
 
 public class SelectFragment extends Fragment {
+
+    private MainViewModel mainViewModel;
 
     private Button btnselect;
 
@@ -30,6 +34,8 @@ public class SelectFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
+        mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+
         btnselect = view.findViewById(R.id.selectf_btnselect);
 
         btnselect.setOnClickListener(new View.OnClickListener() {
@@ -37,7 +43,11 @@ public class SelectFragment extends Fragment {
             public void onClick(View view) {
                 boolean isAllow = PermissionHelper.requestPermission(requireActivity());
                 if (isAllow){
-                    new SelectDialog().show(getParentFragmentManager(), "SELECT_DIALOG_F");
+                    // SELECT IMAGE DIRECTLY
+                    mainViewModel.getOpenFile().openImage();
+
+                    // SELECT IMAGE OR PDF
+                    // new SelectDialog().show(getParentFragmentManager(), "SELECT_DIALOG_F");
                 }
             }
         });

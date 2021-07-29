@@ -3,6 +3,27 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <TextView
+        android:id="@+id/save_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:fontFamily="@font/sfbold"
+        android:text="Saving..."
+        android:textAlignment="center"
+        android:textColor="@color/primary"
+        android:textSize="20sp">
 
+    </TextView>
+
+    <ProgressBar
+        android:layout_below="@id/save_title"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_margin="12dp"
+        android:layout_height="wrap_content">
+
+    </ProgressBar>
 
 </RelativeLayout>

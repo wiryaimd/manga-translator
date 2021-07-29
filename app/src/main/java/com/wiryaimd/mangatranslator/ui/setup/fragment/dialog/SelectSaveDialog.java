@@ -45,6 +45,9 @@ public class SelectSaveDialog extends DialogFragment {
             @Override
             public void onClick(View view) {
                 new SaveDialog(SelectedModel.Type.IMAGE).show(getParentFragmentManager(), "SAVE_DIALOG");
+                if (getDialog() != null){
+                    getDialog().dismiss();
+                }
             }
         });
 
@@ -52,6 +55,9 @@ public class SelectSaveDialog extends DialogFragment {
             @Override
             public void onClick(View view) {
                 new SaveDialog(SelectedModel.Type.PDF).show(getParentFragmentManager(), "SAVE_DIALOG");
+                if (getDialog() != null){
+                    getDialog().dismiss();
+                }
             }
         });
 

@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
@@ -70,7 +71,7 @@ public class ProcessFragment extends Fragment {
     private ProgressBar loading;
     private ImageView imgalert;
 
-    private TextView tvondevice, tvusingapi;
+    private TextView tvondevice, tvusingapi, msDevice, msApi;
 
     private Spinner spinFrom, spinTo;
 
@@ -83,6 +84,9 @@ public class ProcessFragment extends Fragment {
     private TranslateRemoteModel translateRemoteModel;
     private RemoteModelManager remoteModelManager;
     private DownloadConditions downloadConditions;
+
+    private SetupViewModel.TranslateEngine translateEngine = SetupViewModel.TranslateEngine.ON_DEVICE;
+    private SetupViewModel.OCREngine ocrEngine = SetupViewModel.OCREngine.ON_DEVICE;
 
     private int flagFrom = 0, flagTo = 0;
     private boolean sucFrom = false, sucTo = false;
@@ -112,6 +116,8 @@ public class ProcessFragment extends Fragment {
         viewPager = view.findViewById(R.id.processlang_viewpager);
         tvondevice = view.findViewById(R.id.processlang_engine_ondevice);
         tvusingapi = view.findViewById(R.id.processlang_engine_api);
+        msDevice = view.findViewById(R.id.processlang_engine_detecttext_ondevice);
+        msApi = view.findViewById(R.id.processlang_engine_detecttext_api);
 
         // // oke ternyatod data yang tersimpan pada viewmodel berbeda ya tod tiap activity nya tod kentod
         setupViewModel = new ViewModelProvider(requireActivity()).get(SetupViewModel.class);
@@ -132,9 +138,9 @@ public class ProcessFragment extends Fragment {
         viewPager.setPadding(24, 0, 160, 0);
 
         SelectAdapter selectAdapter = new SelectAdapter();
-        recyclerView.setLayoutManager(new LinearLayoutManager(setupViewModel.getApplication()));
+        recyclerView.setLayoutManager(new GridLayoutManager(setupViewModel.getApplication(), 2));
         recyclerView.setAdapter(selectAdapter);
-        selectAdapter.setSelectedList(selectedList);
+        selectAdapter.setSelectedList(setupViewModel.getApplication(), selectedList);
 
         ArrayAdapter<String> spinnerFromAdapter = new ArrayAdapter<>(setupViewModel.getApplication(), R.layout.item_spinner, R.id.spinner_language, LanguagesData.flag_from);
         spinFrom.setAdapter(spinnerFromAdapter);
@@ -146,27 +152,54 @@ public class ProcessFragment extends Fragment {
 
         updateDownloadedModels();
 
+        setupViewModel.getOcrLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.OCREngine>() {
+            @Override
+            public void onChanged(SetupViewModel.OCREngine oE) {
+                ocrEngine = oE;
+            }
+        });
+
+        setupViewModel.getTeLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.TranslateEngine>() {
+            @Override
+            public void onChanged(SetupViewModel.TranslateEngine tE) {
+                translateEngine = tE;
+            }
+        });
+
         setupViewModel.getFlagFromLiveData().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
                 checkRequireDownload(integer, 0);
-                setupViewModel.getTeLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.TranslateEngine>() {
-                    @Override
-                    public void onChanged(SetupViewModel.TranslateEngine translateEngine) {
-                        if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
-                            if (!downloadedFrom || !downloadedTo) {
-                                btnrequire.setVisibility(View.VISIBLE);
-                                imgalert.setVisibility(View.VISIBLE);
-                            } else {
-                                btnrequire.setVisibility(View.GONE);
-                                imgalert.setVisibility(View.GONE);
-                            }
-                        } else {
-                            btnrequire.setVisibility(View.GONE);
-                            imgalert.setVisibility(View.GONE);
-                        }
+                if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                    if (!downloadedFrom || !downloadedTo) {
+                        btnrequire.setVisibility(View.VISIBLE);
+                        imgalert.setVisibility(View.VISIBLE);
+                    } else {
+                        btnrequire.setVisibility(View.GONE);
+                        imgalert.setVisibility(View.GONE);
                     }
-                });
+                } else {
+                    btnrequire.setVisibility(View.GONE);
+                    imgalert.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        msDevice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setupViewModel.getOcrLiveData().setValue(SetupViewModel.OCREngine.ON_DEVICE);
+                msDevice.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
+                msApi.setBackgroundColor(Color.WHITE);
+            }
+        });
+
+        msApi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setupViewModel.getOcrLiveData().setValue(SetupViewModel.OCREngine.USING_API);
+                msApi.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
+                msDevice.setBackgroundColor(Color.WHITE);
             }
         });
 
@@ -174,29 +207,42 @@ public class ProcessFragment extends Fragment {
             @Override
             public void onChanged(Integer integer) {
                 checkRequireDownload(integer, 1);
-                setupViewModel.getTeLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.TranslateEngine>() {
-                    @Override
-                    public void onChanged(SetupViewModel.TranslateEngine translateEngine) {
-                        if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
-                            if (!downloadedFrom || !downloadedTo) {
-                                btnrequire.setVisibility(View.VISIBLE);
-                                imgalert.setVisibility(View.VISIBLE);
-                            } else {
-                                btnrequire.setVisibility(View.GONE);
-                                imgalert.setVisibility(View.GONE);
-                            }
-                        } else {
-                            btnrequire.setVisibility(View.GONE);
-                            imgalert.setVisibility(View.GONE);
-                        }
+                if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                    if (!downloadedFrom || !downloadedTo) {
+                        btnrequire.setVisibility(View.VISIBLE);
+                        imgalert.setVisibility(View.VISIBLE);
+                    } else {
+                        btnrequire.setVisibility(View.GONE);
+                        imgalert.setVisibility(View.GONE);
                     }
-                });
+                } else {
+                    btnrequire.setVisibility(View.GONE);
+                    imgalert.setVisibility(View.GONE);
+                }
             }
         });
 
         spinFrom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == 2){
+                    spinFrom.setSelection(0);
+                    new InfoDialog("Coming Soon!", "Currently, we can't translate from japanese language, wait me for next update!", false).show(getParentFragmentManager(), "INFO_COMING_SOON");
+                    return;
+                }
+
+                if (i == 3 || i == 4){
+                    msApi.performClick();
+                    if (msDevice.isEnabled()){
+                        msDevice.setEnabled(false);
+                    }
+                }else{
+                    msDevice.performClick();
+                    if (!msDevice.isEnabled()){
+                        msDevice.setEnabled(true);
+                    }
+                }
+
                 setupViewModel.getFlagFromLiveData().setValue(i);
                 flagFrom = i;
             }
@@ -246,6 +292,22 @@ public class ProcessFragment extends Fragment {
                         setupViewModel.getFlagFromLiveData().getValue() == 0 ||
                         setupViewModel.getFlagToLiveData().getValue() == 0) {
                     Toast.makeText(setupViewModel.getApplication(), "Please select languages", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws() &&
+                        ocrEngine == SetupViewModel.OCREngine.USING_API && !setupViewModel.getAvailableMicrosoft()){
+                    new InfoDialog("Translate API N/A", "Translate API & Detect Text API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_BOTH");
+                    return;
+                }
+
+                if ((flagFrom == 3 || flagFrom == 4) && !setupViewModel.getAvailableMicrosoft()){
+                    new InfoDialog("AH GOMEN!", "Translate from Chinese or Korean language not available for now, you can try it later", false).show(getParentFragmentManager(), "NOT_AVAILABLE_MS");
+                    return;
+                }
+
+                if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws()){
+                    new InfoDialog("Not Available", "Translate API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AWS");
                     return;
                 }
 
