@@ -226,7 +226,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (PermissionHelper.PERM_CODE == requestCode) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                new SelectDialog().show(getSupportFragmentManager(), "SELECT_DIALOG");
+                mainViewModel.getOpenFile().openImage();
+//                new SelectDialog().show(getSupportFragmentManager(), "SELECT_DIALOG");
             } else {
                 Log.d(TAG, "onActivityResult: Permission result DENIED brohh");
             }
