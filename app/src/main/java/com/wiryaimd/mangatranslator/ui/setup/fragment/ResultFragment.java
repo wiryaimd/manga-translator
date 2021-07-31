@@ -6,17 +6,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wiryaimd.mangatranslator.R;
+import com.wiryaimd.mangatranslator.ui.main.MainActivity;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.adapter.ResultAdapter;
 import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.SelectSaveDialog;
@@ -24,6 +28,8 @@ import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.SelectSaveDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ResultFragment extends Fragment {
 
@@ -32,10 +38,14 @@ public class ResultFragment extends Fragment {
     private SetupViewModel setupViewModel;
 
     private RecyclerView recyclerView;
+    private TextView tvinfo;
 
-    private FloatingActionButton fabSave;
+    private ExtendedFloatingActionButton fabSave;
 
     private ArrayList<Bitmap> bitmapList;
+
+    private Timer timer;
+    private int count = 5;
 
     @Nullable
     @org.jetbrains.annotations.Nullable
@@ -49,6 +59,7 @@ public class ResultFragment extends Fragment {
 
         setupViewModel = new ViewModelProvider(requireActivity()).get(SetupViewModel.class);
 
+        tvinfo = view.findViewById(R.id.result_tvinfo);
         fabSave = view.findViewById(R.id.result_fabsave);
         recyclerView = view.findViewById(R.id.result_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(setupViewModel.getApplication()));
@@ -60,11 +71,36 @@ public class ResultFragment extends Fragment {
             return;
         }
 
-        Log.d(TAG, "onCreate: boom biaahahahhah aye");
-
         ResultAdapter adapter = new ResultAdapter(setupViewModel.getApplication());
         recyclerView.setAdapter(adapter);
         adapter.setBitmapList(bitmapList);
+
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                count -= 1;
+                Log.d(TAG, "run: cek ads: " + count);
+                setupViewModel.getAdsCount().postValue(count);
+            }
+        }, 1000, 1000);
+
+        setupViewModel.getAdsCount().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                if (integer > 0){
+                    tvinfo.setText(("Ads will shown in " + integer));
+                }else{
+                    count = 5;
+                    tvinfo.setVisibility(View.GONE);
+                    timer.cancel();
+
+                    if (MainActivity.interstitialAd.isReady()){
+                        MainActivity.interstitialAd.showAd();
+                    }
+                }
+            }
+        });
 
         fabSave.setOnClickListener(new View.OnClickListener() {
             @Override

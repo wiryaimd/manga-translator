@@ -56,6 +56,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -71,7 +73,7 @@ public class ProcessFragment extends Fragment {
     private ProgressBar loading;
     private ImageView imgalert;
 
-    private TextView tvondevice, tvusingapi, msDevice, msApi;
+    private TextView tvondevice, tvusingapi, msDevice, msApi, processCount;
 
     private Spinner spinFrom, spinTo;
 
@@ -118,6 +120,7 @@ public class ProcessFragment extends Fragment {
         tvusingapi = view.findViewById(R.id.processlang_engine_api);
         msDevice = view.findViewById(R.id.processlang_engine_detecttext_ondevice);
         msApi = view.findViewById(R.id.processlang_engine_detecttext_api);
+        processCount = view.findViewById(R.id.processlang_processcount);
 
         // // oke ternyatod data yang tersimpan pada viewmodel berbeda ya tod tiap activity nya tod kentod
         setupViewModel = new ViewModelProvider(requireActivity()).get(SetupViewModel.class);
@@ -129,13 +132,18 @@ public class ProcessFragment extends Fragment {
             return;
         }
 
+        processCount.setText(("Image will process " + "(" + selectedList.size() + ")"));
+
         List<InfoModel> infoList = new ArrayList<>();
-        infoList.add(new InfoModel("For non-latin languages", "Currently, for non-latin comic language need to select the text manually, if you want automatic translate you can translate the latin comic e.g Manga in english, france etc"));
-        infoList.add(new InfoModel("Download Models", "Before translate Manga/Manhwa/Manhua you need to download model languages which languages selected for translating process"));
+        infoList.add(new InfoModel("Japanese languages", "Currently, i can't translate from japanese language because the writing is horizontal and has a lot of bugs when trying to translate, this will fixed soon, wait me for next update!"));
+        infoList.add(new InfoModel("Download Models", "Before translate Manga/Manhwa/Manhua if you use 'On Device' Engine, you need to download model languages dan make sure your internet is connected"));
+        infoList.add(new InfoModel("Not 100% Accurate", "This app is the first version and still has many shortcomings, you can use 'Using API' Engine for more accurate but not 100% accurate"));
         InfoAdapter infoAdapter = new InfoAdapter(setupViewModel.getApplication(), infoList);
 
         viewPager.setAdapter(infoAdapter);
-        viewPager.setPadding(24, 0, 160, 0);
+        viewPager.setPadding(0, 0, 160, 0);
+
+        movePage();
 
         SelectAdapter selectAdapter = new SelectAdapter();
         recyclerView.setLayoutManager(new GridLayoutManager(setupViewModel.getApplication(), 2));
@@ -149,7 +157,6 @@ public class ProcessFragment extends Fragment {
 
         remoteModelManager = RemoteModelManager.getInstance();
         downloadConditions = new DownloadConditions.Builder().build();
-
         updateDownloadedModels();
 
         setupViewModel.getOcrLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.OCREngine>() {
@@ -169,19 +176,24 @@ public class ProcessFragment extends Fragment {
         setupViewModel.getFlagFromLiveData().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                checkRequireDownload(integer, 0);
-                if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
-                    if (!downloadedFrom || !downloadedTo) {
-                        btnrequire.setVisibility(View.VISIBLE);
-                        imgalert.setVisibility(View.VISIBLE);
-                    } else {
-                        btnrequire.setVisibility(View.GONE);
-                        imgalert.setVisibility(View.GONE);
+                setupViewModel.getTeLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.TranslateEngine>() {
+                    @Override
+                    public void onChanged(SetupViewModel.TranslateEngine tE) {
+                        if (tE == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                            checkRequireDownload(integer, 0);
+                            if (!downloadedFrom || !downloadedTo) {
+                                btnrequire.setVisibility(View.VISIBLE);
+                                imgalert.setVisibility(View.VISIBLE);
+                            } else {
+                                btnrequire.setVisibility(View.GONE);
+                                imgalert.setVisibility(View.GONE);
+                            }
+                        } else {
+                            btnrequire.setVisibility(View.GONE);
+                            imgalert.setVisibility(View.GONE);
+                        }
                     }
-                } else {
-                    btnrequire.setVisibility(View.GONE);
-                    imgalert.setVisibility(View.GONE);
-                }
+                });
             }
         });
 
@@ -190,7 +202,7 @@ public class ProcessFragment extends Fragment {
             public void onClick(View view) {
                 setupViewModel.getOcrLiveData().setValue(SetupViewModel.OCREngine.ON_DEVICE);
                 msDevice.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
-                msApi.setBackgroundColor(Color.WHITE);
+                msApi.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
             }
         });
 
@@ -199,26 +211,31 @@ public class ProcessFragment extends Fragment {
             public void onClick(View view) {
                 setupViewModel.getOcrLiveData().setValue(SetupViewModel.OCREngine.USING_API);
                 msApi.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
-                msDevice.setBackgroundColor(Color.WHITE);
+                msDevice.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
             }
         });
 
         setupViewModel.getFlagToLiveData().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
-                checkRequireDownload(integer, 1);
-                if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
-                    if (!downloadedFrom || !downloadedTo) {
-                        btnrequire.setVisibility(View.VISIBLE);
-                        imgalert.setVisibility(View.VISIBLE);
-                    } else {
-                        btnrequire.setVisibility(View.GONE);
-                        imgalert.setVisibility(View.GONE);
+                setupViewModel.getTeLiveData().observe(getViewLifecycleOwner(), new Observer<SetupViewModel.TranslateEngine>() {
+                    @Override
+                    public void onChanged(SetupViewModel.TranslateEngine tE) {
+                        if (tE == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                            checkRequireDownload(integer, 1);
+                            if (!downloadedFrom || !downloadedTo) {
+                                btnrequire.setVisibility(View.VISIBLE);
+                                imgalert.setVisibility(View.VISIBLE);
+                            } else {
+                                btnrequire.setVisibility(View.GONE);
+                                imgalert.setVisibility(View.GONE);
+                            }
+                        } else {
+                            btnrequire.setVisibility(View.GONE);
+                            imgalert.setVisibility(View.GONE);
+                        }
                     }
-                } else {
-                    btnrequire.setVisibility(View.GONE);
-                    imgalert.setVisibility(View.GONE);
-                }
+                });
             }
         });
 
@@ -227,20 +244,8 @@ public class ProcessFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i == 2){
                     spinFrom.setSelection(0);
-                    new InfoDialog("Coming Soon!", "Currently, we can't translate from japanese language, wait me for next update!", false).show(getParentFragmentManager(), "INFO_COMING_SOON");
+                    new InfoDialog("Coming Soon!", "Currently, i can't translate from japanese language, wait me for next update!", false).show(getParentFragmentManager(), "INFO_COMING_SOON");
                     return;
-                }
-
-                if (i == 3 || i == 4){
-                    msApi.performClick();
-                    if (msDevice.isEnabled()){
-                        msDevice.setEnabled(false);
-                    }
-                }else{
-                    msDevice.performClick();
-                    if (!msDevice.isEnabled()){
-                        msDevice.setEnabled(true);
-                    }
                 }
 
                 setupViewModel.getFlagFromLiveData().setValue(i);
@@ -271,7 +276,7 @@ public class ProcessFragment extends Fragment {
             public void onClick(View view) {
                 setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.ON_DEVICE);
                 tvondevice.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
-                tvusingapi.setBackgroundColor(Color.WHITE);
+                tvusingapi.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
             }
         });
 
@@ -280,7 +285,7 @@ public class ProcessFragment extends Fragment {
             public void onClick(View view) {
                 setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.USING_API);
                 tvusingapi.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
-                tvondevice.setBackgroundColor(Color.WHITE);
+                tvondevice.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
             }
         });
 
@@ -297,7 +302,7 @@ public class ProcessFragment extends Fragment {
 
                 if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws() &&
                         ocrEngine == SetupViewModel.OCREngine.USING_API && !setupViewModel.getAvailableMicrosoft()){
-                    new InfoDialog("Translate API N/A", "Translate API & Detect Text API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_BOTH");
+                    new InfoDialog("Not Available", "Translate API & Detect Text API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_BOTH");
                     return;
                 }
 
@@ -307,16 +312,20 @@ public class ProcessFragment extends Fragment {
                 }
 
                 if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws()){
-                    new InfoDialog("Not Available", "Translate API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AWS");
+                    new InfoDialog("Translate API N/A", "Translate API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AWS");
                     return;
                 }
+
+                checkRequireDownload(flagFrom, 0);
+                checkRequireDownload(flagTo, 1);
 
                 if (selectedList.get(0).getType() == SelectedModel.Type.IMAGE) {
                     if (setupViewModel.getTeLiveData().getValue() == SetupViewModel.TranslateEngine.ON_DEVICE) {
                         if (downloadedFrom && downloadedTo) {
+                            Log.d(TAG, "onClick: process cek btn");
                             new ProcessDialog().show(getParentFragmentManager(), "PROCESS_FRAGMENT_SETUP");
                         } else {
-                            new InfoDialog("Download Language Required", "You will download required language before start translating", false);
+                            new InfoDialog("Download Language", "You need to download required language before start translate", false).show(getParentFragmentManager(), "DIALOG_DOWNLOAD_REQ");
                         }
                     } else {
                         new ProcessDialog().show(getParentFragmentManager(), "PROCESS_FRAGMENT_SETUP_API");
@@ -326,7 +335,7 @@ public class ProcessFragment extends Fragment {
                         if (downloadedFrom && downloadedTo) {
                             new LoadPDFDialog(selectedList.get(0).getUri(), new ArrayList<>()).show(getParentFragmentManager(), "LOAD_PDF_DIALOG");
                         } else {
-                            new InfoDialog("Download Language Required", "You will download required language before start translating", false);
+                            new InfoDialog("Download Language", "You need to download required language before start translate", false).show(getParentFragmentManager(), "DIALOG_DOWNLOAD_REQ2");;
                         }
                     } else {
                         new LoadPDFDialog(selectedList.get(0).getUri(), new ArrayList<>()).show(getParentFragmentManager(), "LOAD_PDF_DIALOG_API");
@@ -422,6 +431,20 @@ public class ProcessFragment extends Fragment {
             }
         });
 
+        setupViewModel.getPageIndexLiveData().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                viewPager.setCurrentItem(integer);
+            }
+        });
+
+        imgalert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new InfoDialog("Download Models", "Before you translate using on device, you need to download models to translate the language", false);
+            }
+        });
+
     }
 
     private void updateDownloadedModels() {
@@ -470,5 +493,24 @@ public class ProcessFragment extends Fragment {
         } else {
             downloadedTo = false;
         }
+    }
+
+    private int pageIndex = 0;
+
+    public void movePage(){
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (pageIndex < 3){
+                    setupViewModel.getPageIndexLiveData().postValue(pageIndex);
+                    pageIndex += 1;
+                }else{
+                    pageIndex = 0;
+                    setupViewModel.getPageIndexLiveData().postValue(pageIndex);
+                }
+            }
+        }, 1000, 17000);
     }
 }

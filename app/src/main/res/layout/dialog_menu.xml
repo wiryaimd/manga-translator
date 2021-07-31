@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primary">
+
+    <Button
+        android:id="@+id/menu_upgrade"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="24dp"
+        android:backgroundTint="@color/color1"
+        android:fontFamily="@font/sfbold"
+        android:padding="12dp"
+        android:text="Upgrade to Premium"
+        android:textAlignment="center"
+        android:textColor="@color/color2"
+        android:textSize="18sp">
+
+    </Button>
+
+    <Button
+        android:id="@+id/menu_reportbug"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/menu_upgrade"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="12dp"
+        android:backgroundTint="@color/white"
+        android:fontFamily="@font/sfbold"
+        android:padding="12dp"
+        android:text="Report Bugs"
+        android:textAlignment="center"
+        android:textColor="@color/primary"
+        android:textSize="18sp">
+
+    </Button>
+
+</RelativeLayout>

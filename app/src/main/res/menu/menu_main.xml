@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/menumain_premium"
+        android:title="Upgrade to Premium"
+        android:icon="@drawable/ic_star"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/menumain_bugreport"
+        android:title="Report Bug"
+        android:icon="@drawable/ic_bugreport"
+        app:showAsAction="ifRoom"/>
+
+</menu>

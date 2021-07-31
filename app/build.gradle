@@ -11,7 +11,7 @@ android {
         applicationId "com.wiryaimd.mangatranslator"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
+        versionCode 2
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -44,6 +44,12 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:28.2.0')
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-storage'
+
+    // ads
+    implementation 'com.applovin:applovin-sdk:10.3.1'
+
+    // billing
+    implementation 'com.anjlab.android.iab.v3:library:1.0.44'
 
     // for latin text recognition
     implementation 'com.google.android.gms:play-services-mlkit-text-recognition:16.3.0'

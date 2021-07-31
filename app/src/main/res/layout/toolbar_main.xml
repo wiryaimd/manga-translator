@@ -8,13 +8,12 @@
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/main_toolbar"
-        app:navigationIcon="@drawable/ic_menu"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
         app:subtitle="First release version 1.0"
         app:subtitleTextColor="@color/color6"
         app:title="Manga Translator"
-        app:titleTextColor="@color/white"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize">
+        app:titleTextColor="@color/white">
 
     </androidx.appcompat.widget.Toolbar>
 

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary2">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include layout="@layout/toolbar_setup"/>
+
+        <TextView
+            android:layout_below="@id/setuplang_appbar"
+            android:id="@+id/premium_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="@font/sfleague"
+            android:text="Buy Premium for 1 month"
+            android:textColor="@color/white"
+            android:textSize="32sp">
+
+        </TextView>
+
+        <Button
+            android:id="@+id/premium_btnbuy"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_below="@id/premium_title"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:backgroundTint="@color/color2"
+            android:text="BUY NOW $0.99/Month"
+            android:textColor="@color/white"
+            android:textSize="16sp">
+
+        </Button>
+
+        <TextView
+            android:id="@+id/premium_maindesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/premium_btnbuy"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="24dp"
+            android:fontFamily="@font/sfbold"
+            android:text="What do you get"
+            android:textColor="@color/color5"
+            android:textSize="18sp">
+
+        </TextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/premium_maindesc"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="24dp"
+                android:drawableStart="@drawable/ic_check"
+                android:drawablePadding="12dp"
+                android:fontFamily="@font/sfreguler"
+                android:text="Translate from Chinese/Korean up to 100 pages per day"
+                android:textColor="@color/color5"
+                android:textSize="16sp">
+
+            </TextView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="24dp"
+                android:drawableStart="@drawable/ic_check"
+                android:drawablePadding="12dp"
+                android:fontFamily="@font/sfreguler"
+                android:text="Unlimited Translate using API Engine"
+                android:textColor="@color/color5"
+                android:textSize="16sp">
+
+            </TextView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="24dp"
+                android:drawableStart="@drawable/ic_check"
+                android:drawablePadding="12dp"
+                android:fontFamily="@font/sfreguler"
+                android:text="Get more 50+ languages to translate"
+                android:textColor="@color/color5"
+                android:textSize="16sp">
+
+            </TextView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="24dp"
+                android:drawableStart="@drawable/ic_check"
+                android:drawablePadding="12dp"
+                android:fontFamily="@font/sfreguler"
+                android:text="No Ads"
+                android:textColor="@color/color5"
+                android:textSize="16sp">
+
+            </TextView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="24dp"
+                android:drawableStart="@drawable/ic_check"
+                android:drawablePadding="12dp"
+                android:fontFamily="@font/sfreguler"
+                android:text="Help this poor developer to rent a better API for a better translator"
+                android:textColor="@color/color5"
+                android:textSize="16sp">
+
+            </TextView>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</ScrollView>

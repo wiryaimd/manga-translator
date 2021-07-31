@@ -5,9 +5,12 @@ import android.util.Log;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.services.translate.AmazonTranslateAsyncClient;
+import com.amazonaws.services.translate.AmazonTranslateClient;
 import com.amazonaws.services.translate.model.TranslateTextRequest;
 import com.amazonaws.services.translate.model.TranslateTextResult;
 import com.wiryaimd.mangatranslator.util.Const;
+
+import java.util.concurrent.Executors;
 
 public class AWSTranslate {
 
@@ -53,6 +56,7 @@ public class AWSTranslate {
                 .withText(res.toLowerCase())
                 .withSourceLanguageCode(source)
                 .withTargetLanguageCode(target);
+
         translateAsyncClient.translateTextAsync(request, new AsyncHandler<TranslateTextRequest, TranslateTextResult>() {
             @Override
             public void onError(Exception exception) {

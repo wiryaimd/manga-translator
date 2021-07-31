@@ -42,6 +42,7 @@ public class MSRecognition {
     public interface Listener{
         void success(Iterator<MergeBlockModel> block);
         List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel);
+        void fail();
     }
 
     public static MSRecognition getInstance(){
@@ -58,28 +59,29 @@ public class MSRecognition {
         gson = new Gson();
     }
 
-    public void requestDetectModel(String img, String options, Listener listener){
+    public void requestDetectModel(String img, String key, String host, String options, Listener listener){
         RequestBody body = RequestBody.create("{\r\"url\": \"" + img + "\"\r }", mediaType);
 
         Request request = new Request.Builder()
                 .url("https://microsoft-computer-vision3.p.rapidapi.com/ocr?" + options)
                 .post(body)
                 .addHeader("content-type", "application/json")
-                .addHeader("x-rapidapi-key", Const.RAPID_API_KEY)
-                .addHeader("x-rapidapi-host", Const.RAPID_API_HOST)
+                .addHeader("x-rapidapi-key", key)
+                .addHeader("x-rapidapi-host", host)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-
+                listener.fail();
             }
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
 
                 if (!response.isSuccessful()){
-                    Log.d(TAG, "onResponse: ngapasich: " + response.code() + " " + response.message());
+                    Log.d(TAG, "onResponse: msCode: " + response.code() + " " + response.message());
+                    listener.fail();
                     return;
                 }
 

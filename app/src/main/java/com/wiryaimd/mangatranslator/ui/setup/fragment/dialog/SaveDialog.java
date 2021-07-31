@@ -93,7 +93,7 @@ public class SaveDialog extends DialogFragment {
                 if (integer == CODE_SUCCESS){
                     setupViewModel.getSaveCodeLiveData().setValue(0);
 
-                    Toast.makeText(setupViewModel.getApplication(), "Saved!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(setupViewModel.getApplication(), "Saved! sdcard/MangaTranslator", Toast.LENGTH_SHORT).show();
                     if (getDialog() != null) getDialog().dismiss();
                 }else if(integer == CODE_ERROR){
                     Toast.makeText(setupViewModel.getApplication(), "Cannot save image, idk why", Toast.LENGTH_SHORT).show();
@@ -123,7 +123,7 @@ public class SaveDialog extends DialogFragment {
         canvas.drawBitmap(bitmapList.get(index), 0, 0, null);
         pdfDocument.finishPage(page);
 
-        bitmapList.get(index).recycle();
+//        bitmapList.get(index).recycle();
 
         if ((index + 1) < bitmapList.size()){
             saveBitmap(pdfDocument, (index + 1));
@@ -170,7 +170,7 @@ public class SaveDialog extends DialogFragment {
         fos.flush();
         fos.close();
 
-        bitmapList.get(index).recycle();
+//        bitmapList.get(index).recycle();
 
         Log.d(TAG, "saveBitmap: boom bieac hahahah ihihi ahyuuu + " + index);
 

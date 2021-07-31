@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
+import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.storage.CStorage;
 import com.wiryaimd.mangatranslator.util.translator.GTranslate;
 import com.wiryaimd.mangatranslator.util.vision.GRecognition;
@@ -31,7 +32,11 @@ public class SetupViewModel extends AndroidViewModel {
     private MutableLiveData<ArrayList<Bitmap>> bitmapListLiveData = new MutableLiveData<>();
     private MutableLiveData<ArrayList<Bitmap>> pdfListLiveData = new MutableLiveData<>();
     private MutableLiveData<Integer> saveCodeLiveData = new MutableLiveData<>();
+    private MutableLiveData<Integer> pageIndexLiveData = new MutableLiveData<>();
+    private MutableLiveData<Integer> adsCount = new MutableLiveData<>();
 
+    private String rapidKey = Const.RAPID_API_KEY;
+    private String rapidHost = Const.RAPID_API_HOST;
     private Boolean availableAws = false;
     private Boolean availableMicrosoft = false;
 
@@ -57,6 +62,7 @@ public class SetupViewModel extends AndroidViewModel {
         teLiveData.setValue(TranslateEngine.ON_DEVICE);
         ocrLiveData.setValue(OCREngine.ON_DEVICE);
         saveCodeLiveData.setValue(0);
+        pageIndexLiveData.setValue(0);
 
         awsTranslate = AWSTranslate.getInstance();
         gTranslate = GTranslate.getInstance();
@@ -97,6 +103,14 @@ public class SetupViewModel extends AndroidViewModel {
         return selectedModelLiveData;
     }
 
+    public MutableLiveData<Integer> getAdsCount() {
+        return adsCount;
+    }
+
+    public MutableLiveData<Integer> getPageIndexLiveData() {
+        return pageIndexLiveData;
+    }
+
     public MutableLiveData<OCREngine> getOcrLiveData() {
         return ocrLiveData;
     }
@@ -119,6 +133,22 @@ public class SetupViewModel extends AndroidViewModel {
 
     public Boolean getAvailableMicrosoft() {
         return availableMicrosoft;
+    }
+
+    public String getRapidKey() {
+        return rapidKey;
+    }
+
+    public String getRapidHost() {
+        return rapidHost;
+    }
+
+    public void setRapidHost(String rapidHost) {
+        this.rapidHost = rapidHost;
+    }
+
+    public void setRapidKey(String rapidKey) {
+        this.rapidKey = rapidKey;
     }
 
     public void setAvailableAws(Boolean availableAws) {

@@ -1,43 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/color2"
-    android:padding="12dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="12dp">
 
-    <TextView
-        android:id="@+id/process_alert"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/sfleague"
-        android:text="Translating in progess, please wait"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="20sp">
+        android:padding="12dp">
 
-    </TextView>
+        <TextView
+            android:id="@+id/process_alert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/sfbold"
+            android:text="Translating in progess, please wait"
+            android:textAlignment="center"
+            android:textColor="@color/primary"
+            android:textSize="20sp">
 
-    <ProgressBar
-        android:id="@+id/process_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/process_alert"
-        android:layout_centerHorizontal="true"
-        android:backgroundTint="@color/color5">
+        </TextView>
 
-    </ProgressBar>
+        <ProgressBar
+            android:id="@+id/process_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:layout_below="@id/process_alert"
+            android:layout_centerHorizontal="true"
+            android:backgroundTint="@color/color5">
 
-    <TextView
-        android:id="@+id/process_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/process_loading"
-        android:fontFamily="@font/sfbold"
-        android:text="Detecting Text 1/23"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="20sp">
+        </ProgressBar>
 
-    </TextView>
+        <TextView
+            android:id="@+id/process_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/process_loading"
+            android:fontFamily="@font/sfbold"
+            android:text="Detecting Text 1/23"
+            android:textAlignment="center"
+            android:textColor="@color/primary"
+            android:textSize="20sp">
 
-</RelativeLayout>
+        </TextView>
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

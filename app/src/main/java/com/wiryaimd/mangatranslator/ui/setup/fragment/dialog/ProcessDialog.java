@@ -92,6 +92,8 @@ public class ProcessDialog extends DialogFragment {
     public View onCreateView(@NonNull @NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         if (getDialog() != null){
             getDialog().requestWindowFeature(STYLE_NO_TITLE);
+            getDialog().setCancelable(false);
+            getDialog().setCanceledOnTouchOutside(true);
         }
         return inflater.inflate(R.layout.dialog_process, container, false);
     }
@@ -160,14 +162,10 @@ public class ProcessDialog extends DialogFragment {
 
         if (isLatin) {
             gRecognition = setupViewModel.getGRecognition();
-
             detectText();
-
         }else{
             // dooo recog mikocok
             msRecognition = setupViewModel.getMsRecognition();
-
-            Log.d(TAG, "onViewCreated: nlatin");
             detectNLatin();
         }
     }
@@ -196,6 +194,7 @@ public class ProcessDialog extends DialogFragment {
 
                 // translate text
                 if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                    setInfoMsg("Translating using Device");
                     gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
                         @Override
                         public void complete(String translated, String source) {
@@ -211,6 +210,7 @@ public class ProcessDialog extends DialogFragment {
                         }
                     });
                 }else{
+                    setInfoMsg("Translating using API");
                     awsTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new AWSTranslate.Listener() {
                         @Override
                         public void complete(String translated, String source) {
@@ -230,6 +230,14 @@ public class ProcessDialog extends DialogFragment {
         });
     }
 
+    public void setInfoMsg(String msg){
+        if (bitmapList.size() != 0){
+            tvinfo.setText((msg + " " + (countTranslate + 1) + "/" + bitmapList.size()));
+        }else{
+            tvinfo.setText((msg + " " + (countTranslate + 1) + "/" + selectedList.size()));
+        }
+    }
+
     public void detectNLatin(){
         LatinDraw latinDraw = new LatinDraw();
 
@@ -241,11 +249,13 @@ public class ProcessDialog extends DialogFragment {
 
         Canvas canvas = new Canvas(bitmap);
 
+        setInfoMsg("Uploading Image");
         storage.uploadImg(bitmap, new CStorage.Listener() {
             @Override
             public void success(String url) {
                 Log.d(TAG, "success: url img: " + url);
-                msRecognition.requestDetectModel(url, options, new MSRecognition.Listener() {
+                setInfoMsg("Detecting text on image");
+                msRecognition.requestDetectModel(url, setupViewModel.getRapidKey(), setupViewModel.getRapidHost(), options, new MSRecognition.Listener() {
                     @Override
                     public void success(Iterator<MergeBlockModel> block) {
                         boolean isFinish = latinDraw.update(block, canvas, lang);
@@ -255,6 +265,7 @@ public class ProcessDialog extends DialogFragment {
 
                         // translate text
                         if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
+                            setInfoMsg("Translating using Device");
                             gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
                                 @Override
                                 public void complete(String translated, String source) {
@@ -271,6 +282,7 @@ public class ProcessDialog extends DialogFragment {
                                 }
                             });
                         }else{
+                            setInfoMsg("Translating using API");
                             awsTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new AWSTranslate.Listener() {
                                 @Override
                                 public void complete(String translated, String source) {
@@ -292,6 +304,11 @@ public class ProcessDialog extends DialogFragment {
                     public List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel) {
                         return setupViewModel.getGRecognition().merge(mergeList, mergeLineModel);
                     }
+
+                    @Override
+                    public void fail() {
+                        new InfoDialog("Request Fail", "Cannot translate from chinese/korean, you can try again", false);
+                    }
                 });
             }
         });
@@ -306,43 +323,35 @@ public class ProcessDialog extends DialogFragment {
 
     public void updateData(){
         countTranslate += 1;
-        Log.d(TAG, "updateData: woeeeee first");
         if (bitmapList.size() != 0){
-            Log.d(TAG, "updateData: lahhhh bitmap");
+            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
             if (countTranslate < bitmapList.size()){
                 if (isLatin){
-                    Log.d(TAG, "updateData: hehhh");
                     detectText();
                 }else{
                     detectNLatin();
                 }
             }else{
-                setupViewModel.getBitmapListLiveData().setValue(resultList);
+                setupViewModel.getBitmapListLiveData().postValue(resultList);
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction().replace(R.id.setuplang_mainframe, new ResultFragment());
                 ft.commit();
                 if (getDialog() != null) getDialog().dismiss();
             }
-            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
         }else {
-            Log.d(TAG, "updateData: else img");
+            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
             if (countTranslate < selectedList.size()) {
-                Log.d(TAG, "updateData: img cekkkk");
                 if (isLatin){
-                    Log.d(TAG, "updateData: yayayaya latin");
                     detectText();
                 }else{
                     detectNLatin();
                 }
             } else {
-                Log.d(TAG, "updateData: nihh gw disini mamank");
-                setupViewModel.getBitmapListLiveData().setValue(resultList);
+                setupViewModel.getBitmapListLiveData().postValue(resultList);
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction().replace(R.id.setuplang_mainframe, new ResultFragment());
                 ft.commit();
                 if (getDialog() != null) getDialog().dismiss();
             }
-            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
-        Log.d(TAG, "updateData: gangerti lagi");
     }
 
     public Bitmap loadBitmap(Uri uri){

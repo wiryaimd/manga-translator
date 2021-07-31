@@ -23,7 +23,7 @@
 
             <LinearLayout
                 android:id="@+id/processlang_enginelinear"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/processlang_viewpager"
                 android:orientation="horizontal">
@@ -38,7 +38,7 @@
                     android:layout_marginEnd="6dp"
                     android:layout_marginBottom="6dp"
                     android:layout_weight="1"
-                    android:background="@drawable/custom_1"
+                    android:background="@drawable/custom_3"
                     android:orientation="vertical">
 
                     <TextView
@@ -47,8 +47,9 @@
                         android:layout_marginStart="12dp"
                         android:layout_marginTop="6dp"
                         android:fontFamily="@font/sfbold"
+                        android:textColor="@color/white"
                         android:text="Translate Engine"
-                        android:textSize="16sp">
+                        android:textSize="14sp">
 
                     </TextView>
 
@@ -61,13 +62,14 @@
                             android:id="@+id/processlang_engine_ondevice"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:textColor="@color/white"
                             android:layout_margin="12dp"
                             android:layout_weight="1"
                             android:background="@drawable/custom_2"
-                            android:fontFamily="@font/sfleague"
+                            android:fontFamily="@font/sfbold"
                             android:padding="6dp"
                             android:text="On Device"
-                            android:textSize="12sp">
+                            android:textSize="16sp">
 
                         </TextView>
 
@@ -76,12 +78,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_margin="12dp"
+                            android:textColor="@color/white"
                             android:layout_weight="1"
-                            android:background="@color/white"
-                            android:fontFamily="@font/sfleague"
+                            android:background="@color/primary"
+                            android:fontFamily="@font/sfbold"
                             android:padding="6dp"
                             android:text="Using API"
-                            android:textSize="12sp">
+                            android:textSize="16sp">
 
                         </TextView>
 
@@ -99,7 +102,7 @@
                     android:layout_marginEnd="12dp"
                     android:layout_marginBottom="6dp"
                     android:layout_weight="1"
-                    android:background="@drawable/custom_1"
+                    android:background="@drawable/custom_3"
                     android:orientation="vertical"
                     android:visibility="gone">
 
@@ -265,11 +268,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/processlang_downloadlanguages"
-                android:layout_marginStart="6dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="18dp"
                 android:layout_marginEnd="12dp"
-                android:layout_marginBottom="6dp"
                 android:fontFamily="@font/sfleague"
+                android:textColor="@color/primary"
                 android:text="Image will process (1)"
                 android:textSize="14sp">
 
@@ -278,11 +281,12 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/processlang_recyclerview"
                 android:layout_width="match_parent"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
                 android:layout_height="match_parent"
                 android:layout_below="@id/processlang_processcount"
                 android:layout_marginTop="6dp"
-                android:nestedScrollingEnabled="true"
-                android:paddingBottom="6dp">
+                android:nestedScrollingEnabled="true">
 
             </androidx.recyclerview.widget.RecyclerView>
 
@@ -298,7 +302,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="12dp"
-        android:backgroundTint="@color/primary"
+        android:backgroundTint="@color/primary4"
         android:letterSpacing="0.2"
         android:text="Process Translate">
 

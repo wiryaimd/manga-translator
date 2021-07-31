@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,7 +45,11 @@ public class SelectSaveDialog extends DialogFragment {
         linearImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new SaveDialog(SelectedModel.Type.IMAGE).show(getParentFragmentManager(), "SAVE_DIALOG");
+                try {
+                    new SaveDialog(SelectedModel.Type.IMAGE).show(getParentFragmentManager(), "SAVE_DIALOG");
+                }catch (RuntimeException e){
+                    Toast.makeText(setupViewModel.getApplication(), "Try Again To Save", Toast.LENGTH_LONG).show();
+                }
                 if (getDialog() != null){
                     getDialog().dismiss();
                 }
@@ -54,7 +59,11 @@ public class SelectSaveDialog extends DialogFragment {
         linearPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new SaveDialog(SelectedModel.Type.PDF).show(getParentFragmentManager(), "SAVE_DIALOG");
+                try {
+                    new SaveDialog(SelectedModel.Type.PDF).show(getParentFragmentManager(), "SAVE_DIALOG");
+                }catch (RuntimeException e){
+                    Toast.makeText(setupViewModel.getApplication(), "Try Again To Save", Toast.LENGTH_LONG).show();
+                }
                 if (getDialog() != null){
                     getDialog().dismiss();
                 }
