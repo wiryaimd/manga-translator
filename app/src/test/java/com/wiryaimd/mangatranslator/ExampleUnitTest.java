@@ -1,5 +1,10 @@
 package com.wiryaimd.mangatranslator;
 
+import com.microsoft.azure.cognitiveservices.vision.computervision.ComputerVisionClient;
+import com.microsoft.azure.cognitiveservices.vision.computervision.ComputerVisionManager;
+import com.microsoft.azure.cognitiveservices.vision.computervision.implementation.ComputerVisionImpl;
+import com.microsoft.azure.cognitiveservices.vision.computervision.models.ReadInStreamHeaders;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -10,8 +15,9 @@ import static org.junit.Assert.*;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class ExampleUnitTest {
+
     @Test
-    public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+    public void MsTest() {
+
     }
 }

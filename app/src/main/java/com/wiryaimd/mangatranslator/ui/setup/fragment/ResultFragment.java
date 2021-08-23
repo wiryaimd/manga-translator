@@ -96,7 +96,7 @@ public class ResultFragment extends Fragment {
                     timer.cancel();
 
                     if (MainActivity.interstitialAd.isReady()){
-                        MainActivity.interstitialAd.showAd();
+//                        MainActivity.interstitialAd.showAd();
                     }
                 }
             }

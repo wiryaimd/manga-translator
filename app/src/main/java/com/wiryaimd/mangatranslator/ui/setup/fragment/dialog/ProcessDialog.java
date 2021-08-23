@@ -36,7 +36,7 @@ import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
 import com.wiryaimd.mangatranslator.util.RealPath;
 import com.wiryaimd.mangatranslator.util.storage.CStorage;
-import com.wiryaimd.mangatranslator.util.translator.AWSTranslate;
+import com.wiryaimd.mangatranslator.util.translator.GApiTranslate;
 import com.wiryaimd.mangatranslator.util.translator.GTranslate;
 import com.wiryaimd.mangatranslator.util.translator.draw.LatinDraw;
 import com.wiryaimd.mangatranslator.util.vision.GRecognition;
@@ -76,7 +76,7 @@ public class ProcessDialog extends DialogFragment {
     private MSRecognition msRecognition;
 
     private GTranslate gTranslate;
-    private AWSTranslate awsTranslate;
+    private GApiTranslate gApiTranslate;
 
     private CStorage storage;
 
@@ -149,7 +149,7 @@ public class ProcessDialog extends DialogFragment {
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
 
-        awsTranslate = setupViewModel.getAwsTranslate();
+        gApiTranslate = setupViewModel.getGApiTranslate();
         gTranslate = setupViewModel.getGTranslate();
         gTranslate.init(LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo]);
 
@@ -211,7 +211,7 @@ public class ProcessDialog extends DialogFragment {
                     });
                 }else{
                     setInfoMsg("Translating using API");
-                    awsTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new AWSTranslate.Listener() {
+                    gApiTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new GApiTranslate.Listener() {
                         @Override
                         public void complete(String translated, String source) {
                             Log.d(TAG, "complete: latin api translate");
@@ -245,7 +245,7 @@ public class ProcessDialog extends DialogFragment {
         if (lang.equalsIgnoreCase("zh")){
             lang = "zh-Hant";
         }
-        String options = "detectOrientation=true&language=" + lang;
+        String options = "vision/v3.2/ocr?language=" + lang + "&detectOrientation=true&model-version=latest";
 
         Canvas canvas = new Canvas(bitmap);
 
@@ -272,7 +272,11 @@ public class ProcessDialog extends DialogFragment {
                                     Log.d(TAG, "complete: non-latin device translate");
 
                                     // draw translated
-                                    latinDraw.drawTranslated(translated, source, canvas, false);
+                                    if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE)){
+                                        latinDraw.drawTranslated(translated, source, canvas, true);
+                                    }else {
+                                        latinDraw.drawTranslated(translated, source, canvas, false);
+                                    }
 
                                     if (block.hasNext()) {
                                         success(block);
@@ -283,12 +287,16 @@ public class ProcessDialog extends DialogFragment {
                             });
                         }else{
                             setInfoMsg("Translating using API");
-                            awsTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new AWSTranslate.Listener() {
+                            gApiTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new GApiTranslate.Listener() {
                                 @Override
                                 public void complete(String translated, String source) {
                                     Log.d(TAG, "complete: non-latin api translate");
 
-                                    latinDraw.drawTranslated(translated, source, canvas, false);
+                                    if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE)){
+                                        latinDraw.drawTranslated(translated, source, canvas, true);
+                                    }else {
+                                        latinDraw.drawTranslated(translated, source, canvas, false);
+                                    }
 
                                     if (block.hasNext()) {
                                         success(block);

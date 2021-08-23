@@ -63,7 +63,8 @@ public class MSRecognition {
         RequestBody body = RequestBody.create("{\r\"url\": \"" + img + "\"\r }", mediaType);
 
         Request request = new Request.Builder()
-                .url("https://microsoft-computer-vision3.p.rapidapi.com/ocr?" + options)
+                .url("https://" + host + "/ocr?" + "options")
+//                .url(host + options)
                 .post(body)
                 .addHeader("content-type", "application/json")
                 .addHeader("x-rapidapi-key", key)

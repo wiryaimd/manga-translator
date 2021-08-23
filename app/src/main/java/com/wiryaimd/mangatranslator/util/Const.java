@@ -13,4 +13,7 @@ public class Const {
     public static final String AWS_ACCESS_ID = "AKIAT7OF2MJPR4I67LTA";
     public static final String AWS_SECRET_KEY = "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";
 
+    public static final String AZURE_KEY = "86f4b34b46c642018ae4c98bdb4fbb8c";
+    public static final String AZURE_HOST = "https://wiryaimd-vision.cognitiveservices.azure.com/";
+
 }

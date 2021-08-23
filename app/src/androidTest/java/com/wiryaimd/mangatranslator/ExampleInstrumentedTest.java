@@ -1,12 +1,27 @@
 package com.wiryaimd.mangatranslator;
 
 import android.content.Context;
+import android.provider.MediaStore;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.amazonaws.util.IOUtils;
+import com.microsoft.azure.cognitiveservices.vision.computervision.ComputerVisionClient;
+import com.microsoft.azure.cognitiveservices.vision.computervision.ComputerVisionManager;
+import com.microsoft.azure.cognitiveservices.vision.computervision.implementation.ComputerVisionImpl;
+import com.microsoft.azure.cognitiveservices.vision.computervision.models.Line;
+import com.microsoft.azure.cognitiveservices.vision.computervision.models.OperationStatusCodes;
+import com.microsoft.azure.cognitiveservices.vision.computervision.models.ReadInStreamHeaders;
+import com.microsoft.azure.cognitiveservices.vision.computervision.models.ReadOperationResult;
+import com.microsoft.azure.cognitiveservices.vision.computervision.models.ReadResult;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -17,10 +32,9 @@ import static org.junit.Assert.*;
  */
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
+
     @Test
     public void useAppContext() {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.wiryaimd.mangatranslator", appContext.getPackageName());
+
     }
 }

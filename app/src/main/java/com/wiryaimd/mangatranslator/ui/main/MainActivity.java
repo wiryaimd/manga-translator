@@ -47,14 +47,12 @@ import com.wiryaimd.mangatranslator.ui.main.fragment.dialog.SelectDialog;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.InfoDialog;
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.PermissionHelper;
-import com.wiryaimd.mangatranslator.util.translator.AWSTranslate;
+import com.wiryaimd.mangatranslator.util.translator.GApiTranslate;
+import com.wiryaimd.mangatranslator.util.vision.GVision;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,13 +77,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             ArrayList<SelectedModel> selectedList = new ArrayList<>();
+            int index = 0;
             for (Uri uri : result){
-                Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                cursor.moveToFirst();
-                selectedList.add(new SelectedModel(cursor.getColumnName(nameIndex), uri, SelectedModel.Type.IMAGE));
+                selectedList.add(new SelectedModel(("Img-" + index), uri, SelectedModel.Type.IMAGE));
+                Log.d(TAG, "onActivityResult: uri result: " + uri.toString());
+                index += 1;
             }
-
+            
             Intent intent = new Intent(MainActivity.this, SetupActivity.class);
             intent.putParcelableArrayListExtra(Const.SELECTED_LIST, selectedList);
             startActivity(intent);

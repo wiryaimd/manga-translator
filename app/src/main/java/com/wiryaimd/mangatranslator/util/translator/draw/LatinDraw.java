@@ -60,7 +60,7 @@ public class LatinDraw {
                 avgHeight += (line.getRect().bottom - line.getRect().top);
 
                 if(lang.equalsIgnoreCase("ja")){
-                    avgWidthJapan = line.getRect().right - line.getRect().left;
+//                    avgWidthJapan = line.getRect().right - line.getRect().left;
                     canvas.drawRect(line.getRect(), paintBg);
                 }
 
@@ -78,8 +78,10 @@ public class LatinDraw {
         mid = textBlock.getBoundingBox().centerX();
 
         if (lang.equalsIgnoreCase("ja")){
-            widthJapan = textBlock.getBoundingBox().right - textBlock.getBoundingBox().left;
-            widthJapan = widthJapan + (float)(widthJapan * 0.30);
+            //widthJapan = textBlock.getBoundingBox().right - textBlock.getBoundingBox().left;
+            // widthJapan = widthJapan + (float)(widthJapan * 0.30);
+            textLength = (avgHeight / avgWidth);
+            //textLength = textLength + (float)(textLength * 0.20);
         }else{
             textLength = (avgWidth / avgHeight);
             textLength = textLength + (float)(textLength * 0.20);
@@ -92,7 +94,7 @@ public class LatinDraw {
         return false;
     }
 
-    private float resize, avgWidthJapan;
+    private float resize; //avgWidthJapan;
 
     public void drawTranslated(String translated, String original, Canvas canvas, boolean isJapan){
         Log.d(TAG, "drawTranslated: translated: " + translated);
@@ -103,6 +105,8 @@ public class LatinDraw {
         if (isJapan){
             resize = (float)(avgWidth - (avgWidth * 0.20));
             paintText.setTextSize(resize);
+            Log.d(TAG, "drawTranslated: avg widthja: " + avgWidth);
+            Log.d(TAG, "drawTranslated: resize size: " + resize);
         }else {
             paintText.setTextSize(avgHeight);
 //            paintStroke.setTextSize(avgHeight);
@@ -120,36 +124,36 @@ public class LatinDraw {
 
         int countLength = 0;
         for (String str : res){
-            if (!isJapan) {
+//            if (!isJapan) {
                 sb.append(str).append(" ");
                 if ((sb.length() - countLength) > textLength) {
                     sb.append("\n");
                     countLength = sb.length();
                 }
-            }else{
-                sb.append(str).append(" ");
-                if ((sb.length() - countLength) > widthJapan) {
-                    sb.append("\n");
-                    countLength = 0;
-                }
-            }
+//            }else{
+//                sb.append(str).append(" ");
+//                if ((sb.length() - countLength) > textLength) {
+//                    sb.append("\n");
+//                    countLength = sb.length();
+//                }
+//            }
         }
 
-//        int i = 0;
         String[] drawList = sb.toString().split("\\n");
         float heightMid = textBlock.getBoundingBox().centerY() - ((avgHeight * drawList.length) / 2);
+        float widthMidY = textBlock.getBoundingBox().centerY() - ((avgWidth * drawList.length) / 2);
+
         for (String draw : drawList) {
             Log.d(TAG, "onSuccess: measure: " + paintText.measureText(draw));
             float textMid = mid - (paintText.measureText(draw) / 2);
             if (isJapan){
-                float textY = widthJapan / avgWidth;
-                canvas.drawText(draw.toUpperCase(), textMid, textY, paintText);
+//                float textY = widthJapan / avgHeight;
+                widthMidY += avgWidth;
+                canvas.drawText(draw.toUpperCase(), textMid, widthMidY, paintText);
             }else{
                 heightMid += avgHeight;
                 canvas.drawText(draw.toUpperCase(), textMid, heightMid, paintText);
             }
-//            canvas.drawText(draw.toUpperCase(), textMid, textY, paintStroke);
-//            i += avgHeight;
         }
         Log.d(TAG, "drawTranslated: drawed brohh");
     }

@@ -48,11 +48,11 @@ dependencies {
     // ads
     implementation 'com.applovin:applovin-sdk:10.3.1'
 
-    // billing
-    implementation 'com.anjlab.android.iab.v3:library:1.0.44'
+    // azure ocr
+//    implementation 'com.microsoft.azure.cognitiveservices:azure-cognitiveservices-computervision:1.0.6-beta'
 
     // for latin text recognition
-    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:16.3.0'
+    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:17.0.0'
 
     // for japan, ch, korea text recognition
 //    implementation 'com.rmtheis:tess-two:9.1.0'
@@ -70,7 +70,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
 
     // aws translate
-    implementation 'com.amazonaws:aws-android-sdk-translate:2.6.20'
+//    implementation 'com.amazonaws:aws-android-sdk-translate:2.6.20'
 
     // apache logging
     implementation 'commons-logging:commons-logging-api:1.1'

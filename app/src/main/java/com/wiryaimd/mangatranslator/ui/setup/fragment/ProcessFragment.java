@@ -242,11 +242,11 @@ public class ProcessFragment extends Fragment {
         spinFrom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 2){
-                    spinFrom.setSelection(0);
-                    new InfoDialog("Coming Soon!", "Currently, i can't translate from japanese language, wait me for next update!", false).show(getParentFragmentManager(), "INFO_COMING_SOON");
-                    return;
-                }
+//                if (i == 2){
+//                    spinFrom.setSelection(0);
+//                    new InfoDialog("Coming Soon!", "Currently, i can't translate from japanese language, wait me for next update!", false).show(getParentFragmentManager(), "INFO_COMING_SOON");
+//                    return;
+//                }
 
                 setupViewModel.getFlagFromLiveData().setValue(i);
                 flagFrom = i;
@@ -300,16 +300,21 @@ public class ProcessFragment extends Fragment {
                     return;
                 }
 
-                if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws() &&
-                        ocrEngine == SetupViewModel.OCREngine.USING_API && !setupViewModel.getAvailableMicrosoft()){
-                    new InfoDialog("Not Available", "Translate API & Detect Text API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_BOTH");
-                    return;
-                }
+//                if (flagFrom == 2 && !setupViewModel.getAvailableAzure()){
+//                    new InfoDialog("Not Available", "You can try it later for japanese language", false).show(getParentFragmentManager(), "NOT_AVAILABLE_JAPAN");
+//                    return;
+//                }else {
+                    if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws() &&
+                            ocrEngine == SetupViewModel.OCREngine.USING_API && !setupViewModel.getAvailableMicrosoft()) {
+                        new InfoDialog("Not Available", "Translate API/Detect Text API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_BOTH");
+                        return;
+                    }
 
-                if ((flagFrom == 3 || flagFrom == 4) && !setupViewModel.getAvailableMicrosoft()){
-                    new InfoDialog("AH GOMEN!", "Translate from Chinese or Korean language not available for now, you can try it later", false).show(getParentFragmentManager(), "NOT_AVAILABLE_MS");
-                    return;
-                }
+                    if ((flagFrom == 3 || flagFrom == 4) && !setupViewModel.getAvailableMicrosoft()) {
+                        new InfoDialog("AH GOMEN!", "Translate from Chinese or Korean language not available for now, you can try it later", false).show(getParentFragmentManager(), "NOT_AVAILABLE_MS");
+                        return;
+                    }
+//                }
 
                 if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws()){
                     new InfoDialog("Translate API N/A", "Translate API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AWS");

@@ -13,6 +13,7 @@
         app:subtitle="First release version 1.0"
         app:subtitleTextColor="@color/color6"
         app:title="Manga Translator"
+        app:navigationIcon="@drawable/ic_premium"
         app:titleTextColor="@color/white">
 
     </androidx.appcompat.widget.Toolbar>

@@ -9,11 +9,11 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.storage.CStorage;
+import com.wiryaimd.mangatranslator.util.translator.GApiTranslate;
 import com.wiryaimd.mangatranslator.util.translator.GTranslate;
 import com.wiryaimd.mangatranslator.util.vision.GRecognition;
 import com.wiryaimd.mangatranslator.util.vision.MSRecognition;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
-import com.wiryaimd.mangatranslator.util.translator.AWSTranslate;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -39,8 +39,9 @@ public class SetupViewModel extends AndroidViewModel {
     private String rapidHost = Const.RAPID_API_HOST;
     private Boolean availableAws = false;
     private Boolean availableMicrosoft = false;
+    private Boolean availableAzure = false;
 
-    private AWSTranslate awsTranslate;
+    private GApiTranslate gApiTranslate;
     private GTranslate gTranslate;
 
     private MSRecognition msRecognition;
@@ -64,7 +65,7 @@ public class SetupViewModel extends AndroidViewModel {
         saveCodeLiveData.setValue(0);
         pageIndexLiveData.setValue(0);
 
-        awsTranslate = AWSTranslate.getInstance();
+        gApiTranslate = GApiTranslate.getInstance();
         gTranslate = GTranslate.getInstance();
 
         msRecognition = MSRecognition.getInstance();
@@ -83,8 +84,8 @@ public class SetupViewModel extends AndroidViewModel {
         return msRecognition;
     }
 
-    public AWSTranslate getAwsTranslate() {
-        return awsTranslate;
+    public GApiTranslate getGApiTranslate() {
+        return gApiTranslate;
     }
 
     public MutableLiveData<Integer> getSaveCodeLiveData() {
@@ -127,6 +128,10 @@ public class SetupViewModel extends AndroidViewModel {
         return flagToLiveData;
     }
 
+    public Boolean getAvailableAzure() {
+        return availableAzure;
+    }
+
     public Boolean getAvailableAws() {
         return availableAws;
     }
@@ -157,5 +162,9 @@ public class SetupViewModel extends AndroidViewModel {
 
     public void setAvailableMicrosoft(Boolean availableMicrosoft) {
         this.availableMicrosoft = availableMicrosoft;
+    }
+
+    public void setAvailableAzure(Boolean availableAzure) {
+        this.availableAzure = availableAzure;
     }
 }

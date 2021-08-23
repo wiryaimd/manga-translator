@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/color7">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -83,7 +84,7 @@
                             android:background="@color/primary"
                             android:fontFamily="@font/sfbold"
                             android:padding="6dp"
-                            android:text="Using API"
+                            android:text="Google Translate"
                             android:textSize="16sp">
 
                         </TextView>
@@ -250,7 +251,7 @@
             <Button
                 android:id="@+id/processlang_downloadlanguages"
                 android:layout_width="180dp"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_below="@id/processlang_lineartranslate"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="6dp"

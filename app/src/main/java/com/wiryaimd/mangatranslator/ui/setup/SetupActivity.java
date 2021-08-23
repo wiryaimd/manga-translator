@@ -62,7 +62,7 @@ public class SetupActivity extends AppCompatActivity {
 
                 Log.d(TAG, "onDataChange: availableAws: " + isAvailable);
 
-                setupViewModel.setAvailableAws(isAvailable);
+                setupViewModel.setAvailableAws(true);
             }
 
             @Override
