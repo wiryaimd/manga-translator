@@ -17,6 +17,9 @@ import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions;
+import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions;
+import com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import com.wiryaimd.mangatranslator.model.merge.MergeBlockModel;
 import com.wiryaimd.mangatranslator.model.merge.MergeLineModel;
@@ -47,7 +50,15 @@ public class GRecognition {
 //    }
 
     public GRecognition(String lang) {
-        textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+        if(lang.equalsIgnoreCase("ja")){
+            textRecognizer = TextRecognition.getClient(new JapaneseTextRecognizerOptions.Builder().build());
+        }else if(lang.equalsIgnoreCase("ko")){
+            textRecognizer = TextRecognition.getClient(new KoreanTextRecognizerOptions.Builder().build());
+        }else if(lang.equalsIgnoreCase("ca")){
+            textRecognizer = TextRecognition.getClient(new ChineseTextRecognizerOptions.Builder().build());
+        }else{
+            textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+        }
     }
 
     public void detect(Bitmap bitmap, Listener listener){
@@ -66,6 +77,7 @@ public class GRecognition {
                             mergeList.add(new MergeLineModel(line.getText(), line.getBoundingBox()));
                         }
                     }
+                    Log.d(TAG, "onComplete: checkv2 block result: " + block.getText());
                 }
 
                 List<List<MergeLineModel>> mergeBlock = new ArrayList<>();

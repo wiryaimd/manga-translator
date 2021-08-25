@@ -163,12 +163,16 @@ public class ProcessDialog extends DialogFragment {
         }
 
         if (isLatin) {
-            gRecognition = setupViewModel.getGRecognition();
+//            gRecognition = setupViewModel.getGRecognition();
+            gRecognition = new GRecognition("latin");
             detectText();
         }else{
+            gRecognition = new GRecognition(LanguagesData.flag_id_from[flagFrom]);
+            Log.d(TAG, "onViewCreated: recog lang: " + LanguagesData.flag_id_from[flagFrom]);
+
             // dooo recog mikocok
-            msRecognition = setupViewModel.getMsRecognition();
-            detectNLatin();
+//            msRecognition = setupViewModel.getMsRecognition();
+            detectText();
         }
 
         setupViewModel.getInfoMsg().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -341,7 +345,7 @@ public class ProcessDialog extends DialogFragment {
 
                     @Override
                     public List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel) {
-                        return setupViewModel.getGRecognition().merge(mergeList, mergeLineModel);
+                        return gRecognition.merge(mergeList, mergeLineModel);
                     }
 
                     @Override
@@ -366,11 +370,11 @@ public class ProcessDialog extends DialogFragment {
         if (bitmapList.size() != 0){
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
             if (countTranslate < bitmapList.size()){
-                if (isLatin){
+//                if (isLatin){
                     detectText();
-                }else{
-                    detectNLatin();
-                }
+//                }else{
+//                    detectNLatin();
+//                }
             }else{
                 setupViewModel.getBitmapListLiveData().postValue(resultList);
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction().replace(R.id.setuplang_mainframe, new ResultFragment());
@@ -380,11 +384,11 @@ public class ProcessDialog extends DialogFragment {
         }else {
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
             if (countTranslate < selectedList.size()) {
-                if (isLatin){
+//                if (isLatin){
                     detectText();
-                }else{
-                    detectNLatin();
-                }
+//                }else{
+//                    detectNLatin();
+//                }
             } else {
                 setupViewModel.getBitmapListLiveData().postValue(resultList);
                 FragmentTransaction ft = getParentFragmentManager().beginTransaction().replace(R.id.setuplang_mainframe, new ResultFragment());
