@@ -217,7 +217,11 @@ public class ProcessDialog extends DialogFragment {
                         public void complete(String translated, String source) {
                             // draw translated
                             Log.d(TAG, "complete: latin device translate");
-                            latinDraw.drawTranslated(translated, source, canvas, false);
+                            if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE)){
+                                latinDraw.drawTranslated(translated, source, canvas, true);
+                            }else {
+                                latinDraw.drawTranslated(translated, source, canvas, false);
+                            }
 
                             if (block.hasNext()) {
                                 completeDetect(block, canvas);
@@ -238,7 +242,11 @@ public class ProcessDialog extends DialogFragment {
                         public void complete(String translated, String source) {
                             Log.d(TAG, "complete: latin api translate");
 
-                            latinDraw.drawTranslated(translated, source, canvas, false);
+                            if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE)){
+                                latinDraw.drawTranslated(translated, source, canvas, true);
+                            }else {
+                                latinDraw.drawTranslated(translated, source, canvas, false);
+                            }
 
                             if (block.hasNext()) {
                                 completeDetect(block, canvas);
