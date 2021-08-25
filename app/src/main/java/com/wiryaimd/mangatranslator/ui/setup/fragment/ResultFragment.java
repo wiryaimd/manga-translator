@@ -45,7 +45,7 @@ public class ResultFragment extends Fragment {
     private ArrayList<Bitmap> bitmapList;
 
     private Timer timer;
-    private int count = 5;
+    private int count = 2;
 
     @Nullable
     @org.jetbrains.annotations.Nullable

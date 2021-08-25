@@ -132,7 +132,7 @@ public class ProcessFragment extends Fragment {
             return;
         }
 
-        processCount.setText(("Image will process " + "(" + selectedList.size() + ")"));
+        processCount.setText((selectedList.size() + " Image sorted by file name"));
 
         List<InfoModel> infoList = new ArrayList<>();
         infoList.add(new InfoModel("Japanese languages", "Currently, i can't translate from japanese language because the writing is horizontal and has a lot of bugs when trying to translate, this will fixed soon, wait me for next update!"));

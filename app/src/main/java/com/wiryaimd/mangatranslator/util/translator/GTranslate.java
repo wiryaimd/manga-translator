@@ -25,6 +25,7 @@ public class GTranslate {
 
     public interface Listener{
         void complete(String translated, String source);
+        void errorState();
     }
 
     public static GTranslate getInstance() {
@@ -49,17 +50,21 @@ public class GTranslate {
 
     public void translate(String source, Listener listener){
         String result = source.replaceAll("\\n", " ").replaceAll("-", " ").replaceAll("\\.", " ");
-        translator.translate(result.toLowerCase()).addOnSuccessListener(new OnSuccessListener<String>() {
-            @Override
-            public void onSuccess(@NonNull @NotNull String s) {
-                listener.complete(s, result);
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull @NotNull Exception e) {
-                Log.d(TAG, "onFailure: fail translate: " + e.getMessage());
-            }
-        });
+        try {
+            translator.translate(result.toLowerCase()).addOnSuccessListener(new OnSuccessListener<String>() {
+                @Override
+                public void onSuccess(@NonNull @NotNull String s) {
+                    listener.complete(s, result);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull @NotNull Exception e) {
+                    Log.d(TAG, "onFailure: fail translate: " + e.getMessage());
+                }
+            });
+        }catch (IllegalStateException e){
+            listener.errorState();
+        }
     }
 
     public void close(){

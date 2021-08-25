@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.ortiz.touchview.TouchImageView;
 import com.wiryaimd.mangatranslator.R;
 
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +54,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.MyHolder> 
 
     public class MyHolder extends RecyclerView.ViewHolder {
 
-        public ImageView imgresult;
+        public TouchImageView imgresult;
 
         public MyHolder(@NonNull @NotNull View itemView) {
             super(itemView);

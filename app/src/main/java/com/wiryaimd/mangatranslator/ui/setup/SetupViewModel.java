@@ -34,6 +34,7 @@ public class SetupViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> saveCodeLiveData = new MutableLiveData<>();
     private MutableLiveData<Integer> pageIndexLiveData = new MutableLiveData<>();
     private MutableLiveData<Integer> adsCount = new MutableLiveData<>();
+    private MutableLiveData<String> infoMsg = new MutableLiveData<>();
 
     private String rapidKey = Const.RAPID_API_KEY;
     private String rapidHost = Const.RAPID_API_HOST;
@@ -45,7 +46,7 @@ public class SetupViewModel extends AndroidViewModel {
     private GTranslate gTranslate;
 
     private MSRecognition msRecognition;
-    private GRecognition gRecognition;
+//    private GRecognition gRecognition;
 
     public enum TranslateEngine{
         ON_DEVICE,
@@ -60,7 +61,7 @@ public class SetupViewModel extends AndroidViewModel {
     public SetupViewModel(@NonNull @NotNull Application application) {
         super(application);
 
-        teLiveData.setValue(TranslateEngine.ON_DEVICE);
+        teLiveData.setValue(TranslateEngine.USING_API);
         ocrLiveData.setValue(OCREngine.ON_DEVICE);
         saveCodeLiveData.setValue(0);
         pageIndexLiveData.setValue(0);
@@ -69,16 +70,16 @@ public class SetupViewModel extends AndroidViewModel {
         gTranslate = GTranslate.getInstance();
 
         msRecognition = MSRecognition.getInstance();
-        gRecognition = GRecognition.getInstance();
+//        gRecognition = GRecognition.getInstance();
     }
 
     public GTranslate getGTranslate() {
         return gTranslate;
     }
 
-    public GRecognition getGRecognition() {
-        return gRecognition;
-    }
+//    public GRecognition getGRecognition() {
+//        return gRecognition;
+//    }
 
     public MSRecognition getMsRecognition() {
         return msRecognition;
@@ -102,6 +103,10 @@ public class SetupViewModel extends AndroidViewModel {
 
     public MutableLiveData<List<SelectedModel>> getSelectedModelLiveData() {
         return selectedModelLiveData;
+    }
+
+    public MutableLiveData<String> getInfoMsg() {
+        return infoMsg;
     }
 
     public MutableLiveData<Integer> getAdsCount() {

@@ -6,12 +6,14 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.mlkit.vision.text.Text;
 import com.wiryaimd.mangatranslator.model.merge.MergeBlockModel;
 import com.wiryaimd.mangatranslator.model.merge.MergeLineModel;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class LatinDraw {
 
@@ -42,7 +44,11 @@ public class LatinDraw {
     }
 
     public boolean update(Iterator<MergeBlockModel> block, Canvas canvas, String lang) {
-        this.textBlock = block.next();
+        try {
+            this.textBlock = block.next();
+        }catch (NoSuchElementException e){
+            return true;
+        }
         Log.d(TAG, "update: textBlock: " + textBlock.getText());
 
         if (textBlock.getBoundingBox() == null){

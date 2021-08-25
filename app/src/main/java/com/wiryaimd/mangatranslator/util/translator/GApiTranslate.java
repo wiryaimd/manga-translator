@@ -38,6 +38,7 @@ public class GApiTranslate {
 
     public interface Listener{
         void complete(String translated, String source);
+        void fail(String msg);
     }
 
     public static GApiTranslate getInstance(){
@@ -69,6 +70,11 @@ public class GApiTranslate {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (!response.isSuccessful()){
                     Log.d(TAG, "onResponse: api Code: " + response.code() + " " + response.message());
+                    if (response.code() == 429){ // your ip blocked from google translate, use on device translate
+                        listener.fail("Your ip blocked from google translate, use on device translate");
+                    }else{
+                        listener.fail(response.message());
+                    }
                     return;
                 }
                 String result = response.body().string();

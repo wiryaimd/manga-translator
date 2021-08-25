@@ -31,7 +31,7 @@ public class GRecognition {
 
     private static final String TAG = "GRecognition";
 
-    private static GRecognition instance = null;
+//    private static GRecognition instance = null;
 
     private TextRecognizer textRecognizer;
 
@@ -39,14 +39,14 @@ public class GRecognition {
         void completeDetect(Iterator<MergeBlockModel> block, Canvas canvas);
     }
 
-    public static GRecognition getInstance(){
-        if (instance == null){
-            instance = new GRecognition();
-        }
-        return instance;
-    }
+//    public static GRecognition getInstance(){
+//        if (instance == null){
+//            instance = new GRecognition(String lang);
+//        }
+//        return instance;
+//    }
 
-    public GRecognition() {
+    public GRecognition(String lang) {
         textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
     }
 

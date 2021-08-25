@@ -34,6 +34,10 @@
         <meta-data android:name="applovin.sdk.key"
             android:value="I9DWtQ4_z_6yBbkTAI50m5uEa9OTfDv60olQBnPuAsTDKVsGrEp6O6fR8-F1HJKCuWG3LV4MGisKP7mmggKP2l"/>
 
+<!--        <meta-data-->
+<!--            android:name="com.google.mlkit.vision.DEPENDENCIES"-->
+<!--            android:value="ocr" />-->
+
     </application>
 
 </manifest>

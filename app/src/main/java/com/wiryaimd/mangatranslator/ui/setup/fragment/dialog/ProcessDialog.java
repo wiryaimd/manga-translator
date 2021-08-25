@@ -1,5 +1,6 @@
 package com.wiryaimd.mangatranslator.ui.setup.fragment.dialog;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -23,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.mlkit.nl.translate.TranslateLanguage;
@@ -93,7 +95,7 @@ public class ProcessDialog extends DialogFragment {
         if (getDialog() != null){
             getDialog().requestWindowFeature(STYLE_NO_TITLE);
             getDialog().setCancelable(false);
-            getDialog().setCanceledOnTouchOutside(true);
+            getDialog().setCanceledOnTouchOutside(false);
         }
         return inflater.inflate(R.layout.dialog_process, container, false);
     }
@@ -168,6 +170,17 @@ public class ProcessDialog extends DialogFragment {
             msRecognition = setupViewModel.getMsRecognition();
             detectNLatin();
         }
+
+        setupViewModel.getInfoMsg().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if (bitmapList.size() != 0){
+                    tvinfo.setText((s + " " + (countTranslate + 1) + "/" + bitmapList.size()));
+                }else{
+                    tvinfo.setText((s + " " + (countTranslate + 1) + "/" + selectedList.size()));
+                }
+            }
+        });
     }
 
     public void checkBitmap(){
@@ -208,6 +221,11 @@ public class ProcessDialog extends DialogFragment {
                                 addBitmap();
                             }
                         }
+
+                        @Override
+                        public void errorState() {
+
+                        }
                     });
                 }else{
                     setInfoMsg("Translating using API");
@@ -224,6 +242,12 @@ public class ProcessDialog extends DialogFragment {
                                 addBitmap();
                             }
                         }
+
+                        @Override
+                        public void fail(String msg) {
+                            new InfoDialog("Request Fail", "Something wrong happen - " + msg, false).show(getParentFragmentManager(), "TL1_FAIL");
+                            if (getDialog() != null) getDialog().dismiss();
+                        }
                     });
                 }
             }
@@ -231,11 +255,7 @@ public class ProcessDialog extends DialogFragment {
     }
 
     public void setInfoMsg(String msg){
-        if (bitmapList.size() != 0){
-            tvinfo.setText((msg + " " + (countTranslate + 1) + "/" + bitmapList.size()));
-        }else{
-            tvinfo.setText((msg + " " + (countTranslate + 1) + "/" + selectedList.size()));
-        }
+        setupViewModel.getInfoMsg().postValue(msg);
     }
 
     public void detectNLatin(){
@@ -284,6 +304,11 @@ public class ProcessDialog extends DialogFragment {
                                         addBitmap();
                                     }
                                 }
+
+                                @Override
+                                public void errorState() {
+
+                                }
                             });
                         }else{
                             setInfoMsg("Translating using API");
@@ -304,6 +329,12 @@ public class ProcessDialog extends DialogFragment {
                                         addBitmap();
                                     }
                                 }
+
+                                @Override
+                                public void fail(String msg) {
+                                    new InfoDialog("Request Fail", "Something wrong happen - " + msg, false).show(getParentFragmentManager(), "TL2_FAIL");
+                                    if (getDialog() != null) getDialog().dismiss();
+                                }
                             });
                         }
                     }
@@ -314,8 +345,9 @@ public class ProcessDialog extends DialogFragment {
                     }
 
                     @Override
-                    public void fail() {
-                        new InfoDialog("Request Fail", "Cannot translate from chinese/korean, you can try again", false);
+                    public void fail(String msg) {
+                        new InfoDialog("Request Fail", "Something wrong happen - " + msg, false).show(getParentFragmentManager(), "REQ_FAIL");
+                        if (getDialog() != null) getDialog().dismiss();
                     }
                 });
             }

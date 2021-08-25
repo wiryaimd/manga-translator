@@ -42,7 +42,7 @@ public class MSRecognition {
     public interface Listener{
         void success(Iterator<MergeBlockModel> block);
         List<MergeLineModel> mergeNormal(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel);
-        void fail();
+        void fail(String msg);
     }
 
     public static MSRecognition getInstance(){
@@ -74,7 +74,7 @@ public class MSRecognition {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                listener.fail();
+                listener.fail("");
             }
 
             @Override
@@ -82,11 +82,12 @@ public class MSRecognition {
 
                 if (!response.isSuccessful()){
                     Log.d(TAG, "onResponse: msCode: " + response.code() + " " + response.message());
-                    listener.fail();
+                    listener.fail(response.message());
                     return;
                 }
 
                 if (response.body() == null){
+                    listener.fail("null");
                     return;
                 }
 
@@ -108,7 +109,7 @@ public class MSRecognition {
                             int left = Integer.parseInt(pos[0]), top = Integer.parseInt(pos[1]), right = Integer.parseInt(pos[2]), bottom = Integer.parseInt(pos[3]);
                             right = right + left;
                             bottom = bottom + top;
-                            Log.d(TAG, "onResponse: left: " + left + " top: " + top + " bottom: " + bottom + " right: " + right);
+                            Log.d(TAG, "onResponse: res: " + left + " top: " + top + " bottom: " + bottom + " right: " + right);
                             Rect rect = new Rect(left, top, right, bottom);
 
                             for(DetectModel.Words word : line.getWords()){
@@ -193,14 +194,16 @@ public class MSRecognition {
 
             if (isAvailableBottom) {
                 float res = mergeHead.getRect().left - mergeList.get(i).getRect().right;
-                float mid = (float) mergeHead.getRect().centerY() / 2;
+                float mid = (float) mergeHead.getRect().centerY() / 4;
                 if (res > 0 - spaceHeightL &&
                         res <= spaceHeightL &&
-                        mergeList.get(i).getRect().top < (mergeHead.getRect().top + mid) &&
+                        mergeList.get(i).getRect().top < (mergeHead.getRect().top + (mid)) &&
+                        mergeList.get(i).getRect().top > (mergeHead.getRect().top - (mid)) &&
                         mergeList.get(i).getRect().bottom > mergeHead.getRect().top) {
                     blockList.add(mergeList.get(i));
                     mergeHead = mergeList.get(i);
                     i = 0;
+                    Log.d(TAG, "merge: available left: " + mergeList.get(i).getText());
                 }
             }
         }
@@ -220,10 +223,11 @@ public class MSRecognition {
 
             if (isAvailableTop) {
                 float res = mergeList.get(i).getRect().left - mergeHead2.getRect().right;
-                float mid = (float) mergeHead2.getRect().centerY() / 2;
+                float mid = (float) mergeHead2.getRect().centerY() / 4;
                 if (res > 0 - spaceHeightR &&
                         res <= spaceHeightR &&
-                        mergeList.get(i).getRect().top < (mergeHead2.getRect().top + mid) &&
+                        mergeList.get(i).getRect().top < (mergeHead2.getRect().top + (mid)) &&
+                        mergeList.get(i).getRect().top > (mergeHead2.getRect().top - (mid)) &&
                         mergeList.get(i).getRect().bottom > mergeHead2.getRect().top) {
                     blockList.add(0, mergeList.get(i));
                     mergeHead2 = mergeList.get(i);

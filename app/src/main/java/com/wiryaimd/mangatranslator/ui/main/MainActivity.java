@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -51,7 +52,11 @@ import com.wiryaimd.mangatranslator.util.translator.GApiTranslate;
 import com.wiryaimd.mangatranslator.util.vision.GVision;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -77,13 +82,38 @@ public class MainActivity extends AppCompatActivity {
             }
 
             ArrayList<SelectedModel> selectedList = new ArrayList<>();
-            int index = 0;
+            HashMap<String, Uri> resultMap = new HashMap<>();
+
             for (Uri uri : result){
-                selectedList.add(new SelectedModel(("Img-" + index), uri, SelectedModel.Type.IMAGE));
                 Log.d(TAG, "onActivityResult: uri result: " + uri.toString());
-                index += 1;
+
+                // get file name brohhh
+                if (!uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+                    String nameFile = new File(uri.getPath()).getName();
+                    Log.d(TAG, "onActivityResult: namefile: " + nameFile);
+
+                    resultMap.put(nameFile, uri);
+                }else {
+                    Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                    cursor.moveToFirst();
+                    int indexCursor = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+
+                    String nameContent = cursor.getString(indexCursor);
+                    Log.d(TAG, "onActivityResult: name content: " + nameContent);
+
+                    resultMap.put(nameContent, uri);
+                }
             }
-            
+
+            // sort hashmap
+            List<String> sortList = new ArrayList<>(resultMap.keySet());
+            Collections.sort(sortList);
+
+            for (String key : sortList){
+                Log.d(TAG, "onActivityResult: sorted key: " + key);
+                selectedList.add(new SelectedModel(key, resultMap.get(key), SelectedModel.Type.IMAGE));
+            }
+
             Intent intent = new Intent(MainActivity.this, SetupActivity.class);
             intent.putParcelableArrayListExtra(Const.SELECTED_LIST, selectedList);
             startActivity(intent);

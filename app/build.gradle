@@ -52,7 +52,21 @@ dependencies {
 //    implementation 'com.microsoft.azure.cognitiveservices:azure-cognitiveservices-computervision:1.0.6-beta'
 
     // for latin text recognition
-    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:17.0.0'
+//    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:17.0.0'
+
+    // =============================== text recog v2
+    // To recognize Latin script
+    implementation 'com.google.mlkit:text-recognition:16.0.0-beta1'
+
+    // To recognize Chinese script
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.0-beta1'
+
+    // To recognize Japanese script
+    implementation 'com.google.mlkit:text-recognition-japanese:16.0.0-beta1'
+
+    // To recognize Korean script
+    implementation 'com.google.mlkit:text-recognition-korean:16.0.0-beta1'
+    // ===============================
 
     // for japan, ch, korea text recognition
 //    implementation 'com.rmtheis:tess-two:9.1.0'
@@ -74,4 +88,7 @@ dependencies {
 
     // apache logging
     implementation 'commons-logging:commons-logging-api:1.1'
+
+    // for zomm in and out
+    implementation 'com.github.MikeOrtiz:TouchImageView:3.0.4'
 }

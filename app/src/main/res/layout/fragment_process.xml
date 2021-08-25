@@ -65,8 +65,8 @@
                             android:layout_height="wrap_content"
                             android:textColor="@color/white"
                             android:layout_margin="12dp"
+                            android:background="@color/primary"
                             android:layout_weight="1"
-                            android:background="@drawable/custom_2"
                             android:fontFamily="@font/sfbold"
                             android:padding="6dp"
                             android:text="On Device"
@@ -81,7 +81,7 @@
                             android:layout_margin="12dp"
                             android:textColor="@color/white"
                             android:layout_weight="1"
-                            android:background="@color/primary"
+                            android:background="@drawable/custom_2"
                             android:fontFamily="@font/sfbold"
                             android:padding="6dp"
                             android:text="Google Translate"
@@ -274,7 +274,7 @@
                 android:layout_marginEnd="12dp"
                 android:fontFamily="@font/sfleague"
                 android:textColor="@color/primary"
-                android:text="Image will process (1)"
+                android:text="1 Image sorted by name"
                 android:textSize="14sp">
 
             </TextView>
