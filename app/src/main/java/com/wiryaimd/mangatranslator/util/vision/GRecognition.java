@@ -38,6 +38,8 @@ public class GRecognition {
 
     private TextRecognizer textRecognizer;
 
+    private String lang;
+
     public interface Listener{
         void completeDetect(Iterator<MergeBlockModel> block, Canvas canvas);
     }
@@ -50,6 +52,8 @@ public class GRecognition {
 //    }
 
     public GRecognition(String lang) {
+        this.lang = lang;
+
         if(lang.equalsIgnoreCase("ja")){
             textRecognizer = TextRecognition.getClient(new JapaneseTextRecognizerOptions.Builder().build());
         }else if(lang.equalsIgnoreCase("ko")){
@@ -81,10 +85,18 @@ public class GRecognition {
                 }
 
                 List<List<MergeLineModel>> mergeBlock = new ArrayList<>();
-                for (int i = 0; i < mergeList.size();) {
-                    List<MergeLineModel> result = merge(mergeList, mergeList.get(i));
-                    mergeBlock.add(result);
-                    mergeList.removeAll(result);
+                if (lang.equalsIgnoreCase("ja")){
+                    for (int i = 0; i < mergeList.size();) {
+                        List<MergeLineModel> result = mergeJapan(mergeList, mergeList.get(i));
+                        mergeBlock.add(result);
+                        mergeList.removeAll(result);
+                    }
+                }else{
+                    for (int i = 0; i < mergeList.size();) {
+                        List<MergeLineModel> result = merge(mergeList, mergeList.get(i));
+                        mergeBlock.add(result);
+                        mergeList.removeAll(result);
+                    }
                 }
 
                 List<MergeBlockModel> blockList = new ArrayList<>();
@@ -188,6 +200,75 @@ public class GRecognition {
         }
 
         return blockList;
+    }
+
+    public List<MergeLineModel> mergeJapan(List<MergeLineModel> mergeList, MergeLineModel mergeLineModel){
+
+        List<MergeLineModel> blockList = new ArrayList<>();
+        MergeLineModel mergeHead = mergeLineModel;
+        MergeLineModel mergeHead2 = mergeLineModel;
+
+        blockList.add(mergeHead);
+        for (int i = 0; i < mergeList.size(); i++) {
+            float spaceHeightL = (mergeHead.getRect().right - mergeHead.getRect().left);
+
+            boolean isAvailableBottom = false;
+            sLoop: for (int j = 0; j < blockList.size(); j++) {
+                if (blockList.get(j) != mergeList.get(i)){
+                    isAvailableBottom = true;
+                }else{
+                    isAvailableBottom = false;
+                    break sLoop;
+                }
+            }
+
+            if (isAvailableBottom) {
+                float res = mergeHead.getRect().left - mergeList.get(i).getRect().right;
+                float mid = (float) mergeHead.getRect().centerY() / 4;
+                if (res > 0 - spaceHeightL &&
+                        res <= spaceHeightL &&
+                        mergeList.get(i).getRect().top < (mergeHead.getRect().top + (mid)) &&
+                        mergeList.get(i).getRect().top > (mergeHead.getRect().top - (mid)) &&
+                        mergeList.get(i).getRect().bottom > mergeHead.getRect().top) {
+                    blockList.add(mergeList.get(i));
+                    mergeHead = mergeList.get(i);
+                    i = 0;
+                    Log.d(TAG, "merge: available left: " + mergeList.get(i).getText());
+                }
+            }
+        }
+
+        for (int i = 0; i < mergeList.size(); i++) {
+            float spaceHeightR = mergeHead2.getRect().right - mergeHead2.getRect().left;
+            boolean isAvailableTop = false;
+
+            tLoop: for (int j = 0; j < blockList.size(); j++) {
+                if (blockList.get(j) != mergeList.get(i)){
+                    isAvailableTop = true;
+                }else{
+                    isAvailableTop = false;
+                    break tLoop;
+                }
+            }
+
+            if (isAvailableTop) {
+                float res = mergeList.get(i).getRect().left - mergeHead2.getRect().right;
+                float mid = (float) mergeHead2.getRect().centerY() / 4;
+                if (res > 0 - spaceHeightR &&
+                        res <= spaceHeightR &&
+                        mergeList.get(i).getRect().top < (mergeHead2.getRect().top + (mid)) &&
+                        mergeList.get(i).getRect().top > (mergeHead2.getRect().top - (mid)) &&
+                        mergeList.get(i).getRect().bottom > mergeHead2.getRect().top) {
+                    blockList.add(0, mergeList.get(i));
+                    mergeHead2 = mergeList.get(i);
+                    i = 0;
+                    Log.d(TAG, "merge: available right: " + mergeList.get(i).getText());
+                }
+            }
+        }
+
+        return blockList;
+
     }
 
 }

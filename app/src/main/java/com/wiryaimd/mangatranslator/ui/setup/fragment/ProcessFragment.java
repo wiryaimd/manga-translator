@@ -32,9 +32,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.mlkit.common.model.DownloadConditions;
 import com.google.mlkit.common.model.RemoteModelManager;
 import com.google.mlkit.nl.translate.TranslateRemoteModel;
+import com.wiryaimd.mangatranslator.BaseApplication;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.model.InfoModel;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
@@ -48,6 +55,7 @@ import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.ProcessDialog;
 import com.wiryaimd.mangatranslator.util.Const;
 import com.wiryaimd.mangatranslator.util.LanguagesData;
 import com.wiryaimd.mangatranslator.util.RealPath;
+import com.wiryaimd.mangatranslator.util.translator.MSTranslate;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -73,7 +81,8 @@ public class ProcessFragment extends Fragment {
     private ProgressBar loading;
     private ImageView imgalert;
 
-    private TextView tvondevice, tvusingapi, msDevice, msApi, processCount;
+    private TextView tvpageperday, tvtlms;
+    private TextView tvondevice, tvusingapi, tvusingms, msDevice, msApi, processCount;
 
     private Spinner spinFrom, spinTo;
 
@@ -96,6 +105,12 @@ public class ProcessFragment extends Fragment {
     private boolean downloadedFrom = true;
     private boolean downloadedTo = true;
 
+    private DatabaseReference dbref;
+
+    private BaseApplication baseApplication;
+
+    int pageTl = 30, pageTlMs = 5;
+
     @Nullable
     @org.jetbrains.annotations.Nullable
     @Override
@@ -107,6 +122,7 @@ public class ProcessFragment extends Fragment {
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
 
         remoteModelManager = RemoteModelManager.getInstance();
+        dbref = FirebaseDatabase.getInstance().getReference().child("mangaTranslator");
 
         btnrequire = view.findViewById(R.id.processlang_downloadlanguages);
         btnprocess = view.findViewById(R.id.processlang_processtranslate);
@@ -121,9 +137,22 @@ public class ProcessFragment extends Fragment {
         msDevice = view.findViewById(R.id.processlang_engine_detecttext_ondevice);
         msApi = view.findViewById(R.id.processlang_engine_detecttext_api);
         processCount = view.findViewById(R.id.processlang_processcount);
+        tvusingms = view.findViewById(R.id.processlang_engine_mstranslate);
+        tvpageperday = view.findViewById(R.id.processlang_tlperday);
+        tvtlms = view.findViewById(R.id.processlang_tlms);
 
         // // oke ternyatod data yang tersimpan pada viewmodel berbeda ya tod tiap activity nya tod kentod
         setupViewModel = new ViewModelProvider(requireActivity()).get(SetupViewModel.class);
+
+        baseApplication = setupViewModel.getApplication();
+
+        if (baseApplication.isSubscribe()){
+            pageTl = 100;
+            pageTlMs = 30;
+        }
+
+        tvpageperday.setText(("Translated page per day (" + baseApplication.getCountTL() + "/" + pageTl + ")"));
+        tvtlms.setText(("Translate using MicrosoftTL per day (" + baseApplication.getCountTLMS() + "/" + pageTlMs + ")"));
 
         selectedList = setupViewModel.getSelectedModelLiveData().getValue();
         if (selectedList == null || selectedList.size() == 0) {
@@ -135,9 +164,8 @@ public class ProcessFragment extends Fragment {
         processCount.setText((selectedList.size() + " Image sorted by file name"));
 
         List<InfoModel> infoList = new ArrayList<>();
-        infoList.add(new InfoModel("Japanese languages", "Currently, i can't translate from japanese language because the writing is horizontal and has a lot of bugs when trying to translate, this will fixed soon, wait me for next update!"));
         infoList.add(new InfoModel("Download Models", "Before translate Manga/Manhwa/Manhua if you use 'On Device' Engine, you need to download model languages dan make sure your internet is connected"));
-        infoList.add(new InfoModel("Not 100% Accurate", "This app is the first version and still has many shortcomings, you can use 'Using API' Engine for more accurate but not 100% accurate"));
+        infoList.add(new InfoModel("Not 100% Accurate", "This app still has many shortcomings, you can use 'Google Translate' Engine or 'Microsoft Translate' for more accurate but not 100% accurate"));
         InfoAdapter infoAdapter = new InfoAdapter(setupViewModel.getApplication(), infoList);
 
         viewPager.setAdapter(infoAdapter);
@@ -276,6 +304,7 @@ public class ProcessFragment extends Fragment {
             public void onClick(View view) {
                 setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.ON_DEVICE);
                 tvondevice.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
+                tvusingms.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
                 tvusingapi.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
             }
         });
@@ -285,6 +314,17 @@ public class ProcessFragment extends Fragment {
             public void onClick(View view) {
                 setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.USING_API);
                 tvusingapi.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
+                tvusingms.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
+                tvondevice.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
+            }
+        });
+
+        tvusingms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setupViewModel.getTeLiveData().setValue(SetupViewModel.TranslateEngine.USING_MS);
+                tvusingapi.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
+                tvusingms.setBackground(ContextCompat.getDrawable(setupViewModel.getApplication(), R.drawable.custom_2));
                 tvondevice.setBackgroundColor(ContextCompat.getColor(setupViewModel.getApplication(), R.color.primary));
             }
         });
@@ -304,20 +344,35 @@ public class ProcessFragment extends Fragment {
 //                    new InfoDialog("Not Available", "You can try it later for japanese language", false).show(getParentFragmentManager(), "NOT_AVAILABLE_JAPAN");
 //                    return;
 //                }else {
-                    if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws() &&
-                            ocrEngine == SetupViewModel.OCREngine.USING_API && !setupViewModel.getAvailableMicrosoft()) {
-                        new InfoDialog("Not Available", "Translate API/Detect Text API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_BOTH");
-                        return;
-                    }
+//                    if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws() &&
+//                            ocrEngine == SetupViewModel.OCREngine.USING_API && !setupViewModel.getAvailableMicrosoft()) {
+//                        new InfoDialog("Not Available", "Translate API/Detect Text API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_BOTH");
+//                        return;
+//                    }
 
-                    if ((flagFrom == 3 || flagFrom == 4) && !setupViewModel.getAvailableMicrosoft()) {
-                        new InfoDialog("AH GOMEN!", "Translate from Chinese or Korean language not available for now, you can try it later", false).show(getParentFragmentManager(), "NOT_AVAILABLE_MS");
-                        return;
-                    }
+//                    if ((flagFrom == 3 || flagFrom == 4) && !setupViewModel.getAvailableMicrosoft()) {
+//                        new InfoDialog("AH GOMEN!", "Translate from Chinese or Korean language not available for now, you can try it later", false).show(getParentFragmentManager(), "NOT_AVAILABLE_MS");
+//                        return;
+//                    }
 //                }
 
-                if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws()){
-                    new InfoDialog("Translate API N/A", "Translate API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AWS");
+//                if (translateEngine == SetupViewModel.TranslateEngine.USING_API && !setupViewModel.getAvailableAws()){
+//                    new InfoDialog("Translate API N/A", "Translate API is not available now, maybe later will available again, you can use 'On Device' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AWS");
+//                    return;
+//                }
+
+                if (translateEngine == SetupViewModel.TranslateEngine.USING_MS && !setupViewModel.getAvailableAzure()){
+                    new InfoDialog("Translate API N/A", "Microsoft Translate is not available now, maybe later will available again, you can use 'On Device' or 'Google Translate' for now", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AZURE");
+                    return;
+                }
+
+                if (translateEngine == SetupViewModel.TranslateEngine.USING_MS && (baseApplication.getCountTLMS() + selectedList.size()) > pageTlMs){
+                    new InfoDialog("Reach Maximum MsTL/Day", "You have reached the maximum for translate using Microsoft Translate, use another Translate Engine or Subscribe to me to get more Features", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AZURE");
+                    return;
+                }
+
+                if (translateEngine != SetupViewModel.TranslateEngine.USING_MS && (baseApplication.getCountTL() + selectedList.size()) > pageTl){
+                    new InfoDialog("Reach Maximum TL Page/Day", "You have reached the maximum for translate page/image per day, you can wait for next day or Subscribe to me to get more Features", false).show(getParentFragmentManager(), "NOT_AVAILABLE_AZURE");
                     return;
                 }
 
@@ -328,12 +383,12 @@ public class ProcessFragment extends Fragment {
                     if (setupViewModel.getTeLiveData().getValue() == SetupViewModel.TranslateEngine.ON_DEVICE) {
                         if (downloadedFrom && downloadedTo) {
                             Log.d(TAG, "onClick: process cek btn");
-                            new ProcessDialog().show(getParentFragmentManager(), "PROCESS_FRAGMENT_SETUP");
+                            processTl();
                         } else {
                             new InfoDialog("Download Language", "You need to download required language before start translate", false).show(getParentFragmentManager(), "DIALOG_DOWNLOAD_REQ");
                         }
                     } else {
-                        new ProcessDialog().show(getParentFragmentManager(), "PROCESS_FRAGMENT_SETUP_API");
+                        processTl();
                     }
                 } else {
                     if (setupViewModel.getTeLiveData().getValue() == SetupViewModel.TranslateEngine.ON_DEVICE) {
@@ -452,6 +507,29 @@ public class ProcessFragment extends Fragment {
 
     }
 
+    public void processTl(){
+
+        InfoDialog checkConnection = new InfoDialog("Check Connection", "Preparing for translate", true);
+        checkConnection.show(getParentFragmentManager(), "PREPARE_TL");
+
+        Task<DataSnapshot> task =  dbref.child("translatedCount").get();
+        task.addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(@NonNull @NotNull DataSnapshot dataSnapshot) {
+                Integer tlCount = dataSnapshot.getValue(Integer.class);
+                if (tlCount != null){
+                    tlCount += 1;
+                    dbref.child("translatedCount").setValue(tlCount);
+                }else{
+                    dbref.child("translatedCount").setValue(0);
+                }
+                if (checkConnection.getDialog() != null) checkConnection.dismiss();
+
+                new ProcessDialog().show(getParentFragmentManager(), "PROCESS_FRAGMENT_SETUP");
+            }
+        });
+    }
+
     private void updateDownloadedModels() {
         downloadedList.clear();
         remoteModelManager.getDownloadedModels(TranslateRemoteModel.class).addOnSuccessListener(new OnSuccessListener<Set<TranslateRemoteModel>>() {
@@ -477,9 +555,9 @@ public class ProcessFragment extends Fragment {
 
         String data;
         if (type == 0) {
-            data = LanguagesData.flag_code_from[pos];
+            data = LanguagesData.flag_id_from[pos];
         } else {
-            data = LanguagesData.flag_code[pos];
+            data = LanguagesData.flag_id_to[pos];
         }
 
         for (String lang : downloadedList) {

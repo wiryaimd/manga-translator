@@ -3,41 +3,73 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/primary">
 
     <TextView
         android:id="@+id/result_tvinfo"
-        android:textSize="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:background="@color/primary6"
         android:fontFamily="@font/sfreguler"
         android:padding="4dp"
-        android:background="@color/primary6"
         android:textColor="@color/white"
-        android:layout_width="match_parent"
-        android:layout_height="32dp">
+        android:textSize="16sp">
 
     </TextView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/result_recyclerview"
-        android:layout_below="@id/result_tvinfo"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/result_viewpager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:layout_below="@id/result_tvinfo">
 
-    </androidx.recyclerview.widget.RecyclerView>
+    </androidx.viewpager2.widget.ViewPager2>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/result_fabsave"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@id/result_linear_move"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="12dp"
-        app:icon="@drawable/ic_save"
-        android:textColor="@color/white"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         android:text="Save to local"
-        app:iconTint="@color/white"
-        app:backgroundTint="@color/primary">
+        android:textColor="@color/primary"
+        app:backgroundTint="@color/white"
+        app:icon="@drawable/ic_save"
+        app:iconTint="@color/primary">
 
     </com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton>
+
+    <LinearLayout
+        android:id="@+id/result_linear_move"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="6dp">
+
+        <ImageView
+            android:id="@+id/result_prev"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/custom_2"
+            android:src="@drawable/ic_back">
+
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/result_next"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/custom_2"
+            android:src="@drawable/ic_next">
+
+        </ImageView>
+
+    </LinearLayout>
 
 </RelativeLayout>

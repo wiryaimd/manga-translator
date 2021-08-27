@@ -40,6 +40,7 @@ import com.wiryaimd.mangatranslator.util.RealPath;
 import com.wiryaimd.mangatranslator.util.storage.CStorage;
 import com.wiryaimd.mangatranslator.util.translator.GApiTranslate;
 import com.wiryaimd.mangatranslator.util.translator.GTranslate;
+import com.wiryaimd.mangatranslator.util.translator.MSTranslate;
 import com.wiryaimd.mangatranslator.util.translator.draw.LatinDraw;
 import com.wiryaimd.mangatranslator.util.vision.GRecognition;
 import com.wiryaimd.mangatranslator.util.vision.MSRecognition;
@@ -79,6 +80,7 @@ public class ProcessDialog extends DialogFragment {
 
     private GTranslate gTranslate;
     private GApiTranslate gApiTranslate;
+    private MSTranslate msTranslate;
 
     private CStorage storage;
 
@@ -151,6 +153,7 @@ public class ProcessDialog extends DialogFragment {
             tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
         }
 
+        msTranslate = new MSTranslate();
         gApiTranslate = setupViewModel.getGApiTranslate();
         gTranslate = setupViewModel.getGTranslate();
         gTranslate.init(LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo]);
@@ -167,8 +170,11 @@ public class ProcessDialog extends DialogFragment {
             gRecognition = new GRecognition("latin");
             detectText();
         }else{
-            gRecognition = new GRecognition(LanguagesData.flag_id_from[flagFrom]);
-            Log.d(TAG, "onViewCreated: recog lang: " + LanguagesData.flag_id_from[flagFrom]);
+            String mLang = LanguagesData.flag_id_from[flagFrom];
+            if (mLang.equalsIgnoreCase("zh") || mLang.equalsIgnoreCase("zh-Hant")){
+                mLang = "ca";
+            }
+            gRecognition = new GRecognition(mLang);
 
             // dooo recog mikocok
 //            msRecognition = setupViewModel.getMsRecognition();
@@ -196,8 +202,22 @@ public class ProcessDialog extends DialogFragment {
     }
 
     public void detectText(){
-        LatinDraw latinDraw = new LatinDraw();
         checkBitmap();
+
+        if (bitmap == null){
+            countTranslate += 1;
+            if (countTranslate < selectedList.size()) {
+                detectText();
+            }else{
+                setupViewModel.getBitmapListLiveData().postValue(resultList);
+                FragmentTransaction ft = getParentFragmentManager().beginTransaction().replace(R.id.setuplang_mainframe, new ResultFragment());
+                ft.commit();
+                if (getDialog() != null) getDialog().dismiss();
+            }
+            return;
+        }
+
+        LatinDraw latinDraw = new LatinDraw(bitmap.getHeight());
 
         // detect text
         gRecognition.detect(bitmap, new GRecognition.Listener() {
@@ -205,19 +225,25 @@ public class ProcessDialog extends DialogFragment {
             public void completeDetect(Iterator<MergeBlockModel> block, Canvas canvas) {
                 // draw bg & get position
                 boolean isFinish = latinDraw.update(block, canvas, lang);
-                if (isFinish){
+                MergeBlockModel mergeBlockModel = latinDraw.getTextBlock();
+
+                if (isFinish || mergeBlockModel == null || mergeBlockModel.getText() == null){
                     addBitmap();
+                    return;
                 }
 
                 // translate text
+
                 if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
                     setInfoMsg("Translating using Device");
-                    gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
+                    gTranslate.translate(mergeBlockModel.getText(), new GTranslate.Listener() {
                         @Override
                         public void complete(String translated, String source) {
                             // draw translated
                             Log.d(TAG, "complete: latin device translate");
-                            if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE)){
+                            if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE) ||
+                                    LanguagesData.flag_code_from[flagFrom].equalsIgnoreCase("zh-sv") ||
+                                    LanguagesData.flag_code_from[flagFrom].equalsIgnoreCase("zh-tv")){
                                 latinDraw.drawTranslated(translated, source, canvas, true);
                             }else {
                                 latinDraw.drawTranslated(translated, source, canvas, false);
@@ -235,14 +261,51 @@ public class ProcessDialog extends DialogFragment {
 
                         }
                     });
+                }else if(translateEngine == SetupViewModel.TranslateEngine.USING_MS){
+                    setInfoMsg("Translating using Microsoft Translate");
+                    String lang = LanguagesData.flag_code_from[flagFrom];
+                    if (lang.equalsIgnoreCase("zh-tv")){
+                        lang = "zh-Hant";
+                    }else if(lang.equalsIgnoreCase("zh-sv")){
+                        lang = "zh-Hans";
+                    }
+
+                    msTranslate.translateText(mergeBlockModel.getText(), lang, LanguagesData.flag_id_to[flagTo], setupViewModel.getAzureKey(), setupViewModel.getAzureHost(), new MSTranslate.Listener() {
+                        @Override
+                        public void complete(String translated, String source) {
+                            Log.d(TAG, "complete: latin ms translate");
+
+                            if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE) ||
+                                    LanguagesData.flag_code_from[flagFrom].equalsIgnoreCase("zh-sv") ||
+                                    LanguagesData.flag_code_from[flagFrom].equalsIgnoreCase("zh-tv")){
+                                latinDraw.drawTranslated(translated, source, canvas, true);
+                            }else {
+                                latinDraw.drawTranslated(translated, source, canvas, false);
+                            }
+
+                            if (block.hasNext()) {
+                                completeDetect(block, canvas);
+                            } else {
+                                addBitmap();
+                            }
+                        }
+
+                        @Override
+                        public void fail(String msg) {
+                            new InfoDialog("Request Fail", "Something wrong happen - " + msg, false).show(getParentFragmentManager(), "TL_MS_FAIL");
+                            if (getDialog() != null) getDialog().dismiss();
+                        }
+                    });
                 }else{
-                    setInfoMsg("Translating using API");
-                    gApiTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new GApiTranslate.Listener() {
+                    setInfoMsg("Translating using Google Translate");
+                    gApiTranslate.translateText(mergeBlockModel.getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new GApiTranslate.Listener() {
                         @Override
                         public void complete(String translated, String source) {
                             Log.d(TAG, "complete: latin api translate");
 
-                            if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE)){
+                            if (LanguagesData.flag_id_from[flagFrom].equalsIgnoreCase(TranslateLanguage.JAPANESE) ||
+                                    LanguagesData.flag_code_from[flagFrom].equalsIgnoreCase("zh-sv") ||
+                                    LanguagesData.flag_code_from[flagFrom].equalsIgnoreCase("zh-tv")){
                                 latinDraw.drawTranslated(translated, source, canvas, true);
                             }else {
                                 latinDraw.drawTranslated(translated, source, canvas, false);
@@ -271,11 +334,11 @@ public class ProcessDialog extends DialogFragment {
     }
 
     public void detectNLatin(){
-        LatinDraw latinDraw = new LatinDraw();
+        LatinDraw latinDraw = new LatinDraw(bitmap.getHeight());
 
         checkBitmap();
         if (lang.equalsIgnoreCase("zh")){
-            lang = "zh-Hant";
+            lang = "zh-Hans";
         }
         String options = "vision/v3.2/ocr?language=" + lang + "&detectOrientation=true&model-version=latest";
 
@@ -291,14 +354,17 @@ public class ProcessDialog extends DialogFragment {
                     @Override
                     public void success(Iterator<MergeBlockModel> block) {
                         boolean isFinish = latinDraw.update(block, canvas, lang);
-                        if (isFinish){
+                        String textBlock = latinDraw.getTextBlock().getText();
+
+                        if (isFinish || textBlock == null){
                             addBitmap();
+                            return;
                         }
 
                         // translate text
                         if (translateEngine == SetupViewModel.TranslateEngine.ON_DEVICE) {
                             setInfoMsg("Translating using Device");
-                            gTranslate.translate(latinDraw.getTextBlock().getText(), new GTranslate.Listener() {
+                            gTranslate.translate(textBlock, new GTranslate.Listener() {
                                 @Override
                                 public void complete(String translated, String source) {
                                     Log.d(TAG, "complete: non-latin device translate");
@@ -324,7 +390,7 @@ public class ProcessDialog extends DialogFragment {
                             });
                         }else{
                             setInfoMsg("Translating using API");
-                            gApiTranslate.translateText(latinDraw.getTextBlock().getText(), LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new GApiTranslate.Listener() {
+                            gApiTranslate.translateText(textBlock, LanguagesData.flag_id_from[flagFrom], LanguagesData.flag_id_to[flagTo], new GApiTranslate.Listener() {
                                 @Override
                                 public void complete(String translated, String source) {
                                     Log.d(TAG, "complete: non-latin api translate");
@@ -376,7 +442,7 @@ public class ProcessDialog extends DialogFragment {
     public void updateData(){
         countTranslate += 1;
         if (bitmapList.size() != 0){
-            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + bitmapList.size()));
+            setInfoMsg("Processing image");
             if (countTranslate < bitmapList.size()){
 //                if (isLatin){
                     detectText();
@@ -390,7 +456,7 @@ public class ProcessDialog extends DialogFragment {
                 if (getDialog() != null) getDialog().dismiss();
             }
         }else {
-            tvinfo.setText(("Processing image " + (countTranslate + 1) + "/" + selectedList.size()));
+            setInfoMsg("Processing image");
             if (countTranslate < selectedList.size()) {
 //                if (isLatin){
                     detectText();
@@ -410,6 +476,7 @@ public class ProcessDialog extends DialogFragment {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
         try {
+            new File(uri.getPath()).mkdirs();
             InputStream input = setupViewModel.getApplication().getContentResolver().openInputStream(uri);
             Bitmap bitmap = BitmapFactory.decodeStream(input, null, options);
             input.close();

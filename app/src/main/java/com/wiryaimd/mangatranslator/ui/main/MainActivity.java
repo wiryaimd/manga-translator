@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -24,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.applovin.mediation.MaxAd;
 import com.applovin.mediation.MaxAdListener;
@@ -38,6 +40,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.wiryaimd.mangatranslator.BaseApplication;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.model.SelectedModel;
 import com.wiryaimd.mangatranslator.ui.main.fragment.SelectFragment;
@@ -78,6 +81,11 @@ public class MainActivity extends AppCompatActivity {
         public void onActivityResult(List<Uri> result) {
 
             if(result.size() == 0) {
+                return;
+            }
+            
+            if (result.size() > 10){
+                Toast.makeText(MainActivity.this, "Maximum image 10", Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -246,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     @Override

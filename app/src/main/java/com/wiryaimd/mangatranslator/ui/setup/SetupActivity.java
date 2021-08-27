@@ -87,6 +87,22 @@ public class SetupActivity extends AppCompatActivity {
             }
         });
 
+        dbref.child("availableAzure").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                Boolean isAvailable = snapshot.getValue(Boolean.class);
+
+                Log.d(TAG, "onDataChange: availableazure: " + isAvailable);
+
+                setupViewModel.setAvailableAzure(isAvailable);
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
+
         dbref.child("rapid_key").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
@@ -107,6 +123,34 @@ public class SetupActivity extends AppCompatActivity {
                 String host = snapshot.getValue(String.class);
                 Log.d(TAG, "onDataChange: rapid_host from rd: " + host);
                 setupViewModel.setRapidHost(host);
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
+
+        dbref.child("azure_host").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                String host = snapshot.getValue(String.class);
+                Log.d(TAG, "onDataChange: azure from rd: " + host);
+                setupViewModel.setAzureHost(host);
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
+
+        dbref.child("azure_key").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                String key = snapshot.getValue(String.class);
+                Log.d(TAG, "onDataChange: azure key from rd: " + key);
+                setupViewModel.setAzureKey(key);
             }
 
             @Override

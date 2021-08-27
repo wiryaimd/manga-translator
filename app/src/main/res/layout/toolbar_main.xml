@@ -10,7 +10,6 @@
         android:id="@+id/main_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:subtitle="First release version 1.0"
         app:subtitleTextColor="@color/color6"
         app:title="Manga Translator"
         app:navigationIcon="@drawable/ic_premium"

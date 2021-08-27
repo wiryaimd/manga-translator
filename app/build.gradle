@@ -11,8 +11,8 @@ android {
         applicationId "com.wiryaimd.mangatranslator"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 3
-        versionName "1.0"
+        versionCode 4
+        versionName "1.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -91,4 +91,7 @@ dependencies {
 
     // for zomm in and out
     implementation 'com.github.MikeOrtiz:TouchImageView:3.0.4'
+
+    // paypal sdk
+    implementation 'com.paypal.sdk:paypal-android-sdk:2.16.0'
 }

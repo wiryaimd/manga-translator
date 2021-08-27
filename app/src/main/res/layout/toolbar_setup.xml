@@ -9,7 +9,6 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/setuplang_toolbar"
         app:navigationIcon="@drawable/ic_back"
-        app:subtitle="First release version 1.0"
         app:subtitleTextColor="@color/color6"
         app:title="Manga Translator"
         app:titleTextColor="@color/white"

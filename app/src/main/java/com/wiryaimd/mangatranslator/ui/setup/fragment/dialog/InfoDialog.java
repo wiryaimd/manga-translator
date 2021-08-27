@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,8 @@ public class InfoDialog extends DialogFragment {
 
     private boolean isProcess;
     private String title, message;
+
+    private ProgressBar loading;
 
     public InfoDialog(String title, String message, boolean isProcess) {
         this.title = title;
@@ -43,6 +46,12 @@ public class InfoDialog extends DialogFragment {
         tvtitle = view.findViewById(R.id.infodialog_item_title);
         tvdesc = view.findViewById(R.id.infodialog_item_desc);
         btnok = view.findViewById(R.id.infodialog_item_ok);
+        loading = view.findViewById(R.id.infodialog_item_loading);
+
+        if (isProcess){
+            btnok.setVisibility(View.GONE);
+            loading.setVisibility(View.VISIBLE);
+        }
 
         tvtitle.setText(title);
         tvdesc.setText(message);

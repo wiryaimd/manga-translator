@@ -93,7 +93,7 @@ public class SaveDialog extends DialogFragment {
                 if (integer == CODE_SUCCESS){
                     setupViewModel.getSaveCodeLiveData().setValue(0);
 
-                    Toast.makeText(setupViewModel.getApplication(), "Saved! sdcard/MangaTranslator", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(setupViewModel.getApplication(), "Saved! on sdcard/MangaTranslator", Toast.LENGTH_LONG).show();
                     if (getDialog() != null) getDialog().dismiss();
                 }else if(integer == CODE_ERROR){
                     Toast.makeText(setupViewModel.getApplication(), "Cannot save image, idk why", Toast.LENGTH_SHORT).show();

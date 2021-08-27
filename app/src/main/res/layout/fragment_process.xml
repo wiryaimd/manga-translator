@@ -4,10 +4,9 @@
     android:layout_height="match_parent"
     android:background="@color/color7">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:nestedScrollingEnabled="true">
+        android:layout_height="match_parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -23,10 +22,47 @@
             </androidx.viewpager.widget.ViewPager>
 
             <LinearLayout
+                android:id="@+id/processlang_infomax"
+                android:layout_below="@id/processlang_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/processlang_tlperday"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:fontFamily="@font/sfbold"
+                    android:padding="6dp"
+                    android:background="@drawable/custom_1"
+                    android:text="Translated page per day (0/30)"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                </TextView>
+
+                <TextView
+                    android:id="@+id/processlang_tlms"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginEnd="12dp"
+                    android:fontFamily="@font/sfbold"
+                    android:padding="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:background="@drawable/custom_1"
+                    android:text="Translate using MicrosoftTL per day (0/5)"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                </TextView>
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/processlang_enginelinear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/processlang_viewpager"
+                android:layout_below="@id/processlang_infomax"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -85,6 +121,21 @@
                             android:fontFamily="@font/sfbold"
                             android:padding="6dp"
                             android:text="Google Translate"
+                            android:textSize="16sp">
+
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/processlang_engine_mstranslate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:layout_margin="12dp"
+                            android:background="@color/primary"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/sfbold"
+                            android:padding="6dp"
+                            android:text="Microsoft Translate"
                             android:textSize="16sp">
 
                         </TextView>
@@ -293,16 +344,17 @@
 
         </RelativeLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <Button
         android:id="@+id/processlang_processtranslate"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="12dp"
+        android:textSize="14sp"
         android:backgroundTint="@color/primary4"
         android:letterSpacing="0.2"
         android:text="Process Translate">

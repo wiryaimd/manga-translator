@@ -20,7 +20,7 @@
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="16dp"
             android:fontFamily="@font/sfleague"
-            android:text="Buy Premium for 1 month"
+            android:text="Subscribe Premium for 1 month"
             android:textColor="@color/white"
             android:textSize="32sp">
 
@@ -34,17 +34,32 @@
             android:layout_marginStart="24dp"
             android:layout_marginEnd="24dp"
             android:backgroundTint="@color/color2"
-            android:text="BUY NOW $0.99/Month"
+            android:text="SUBSCRIBE NOW $1.0/Month"
             android:textColor="@color/white"
             android:textSize="16sp">
 
         </Button>
 
         <TextView
-            android:id="@+id/premium_maindesc"
+            android:visibility="gone"
+            android:id="@+id/premium_expires"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/premium_btnbuy"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="24dp"
+            android:text="Expires in 29 days 23 hours"
+            android:textColor="@color/color1"
+            android:textSize="18sp">
+
+        </TextView>
+
+        <TextView
+            android:id="@+id/premium_maindesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/premium_expires"
             android:layout_marginStart="24dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="24dp"
@@ -70,7 +85,7 @@
                 android:drawableStart="@drawable/ic_check"
                 android:drawablePadding="12dp"
                 android:fontFamily="@font/sfreguler"
-                android:text="Translate from Chinese/Korean up to 100 pages per day"
+                android:text="Translate from Japanese/Chinese/Korean up to 100 pages/image per day"
                 android:textColor="@color/color5"
                 android:textSize="16sp">
 
@@ -85,7 +100,7 @@
                 android:drawableStart="@drawable/ic_check"
                 android:drawablePadding="12dp"
                 android:fontFamily="@font/sfreguler"
-                android:text="Unlimited Translate using API Engine"
+                android:text="+30 using Microsoft Translate"
                 android:textColor="@color/color5"
                 android:textSize="16sp">
 
@@ -100,7 +115,7 @@
                 android:drawableStart="@drawable/ic_check"
                 android:drawablePadding="12dp"
                 android:fontFamily="@font/sfreguler"
-                android:text="Get more 50+ languages to translate"
+                android:text="Get more 50+ languages translate from"
                 android:textColor="@color/color5"
                 android:textSize="16sp">
 

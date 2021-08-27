@@ -35,9 +35,12 @@ public class SetupViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> pageIndexLiveData = new MutableLiveData<>();
     private MutableLiveData<Integer> adsCount = new MutableLiveData<>();
     private MutableLiveData<String> infoMsg = new MutableLiveData<>();
+    private MutableLiveData<Integer> countPage = new MutableLiveData<>();
 
     private String rapidKey = Const.RAPID_API_KEY;
     private String rapidHost = Const.RAPID_API_HOST;
+    private String azureHost = "";
+    private String azureKey = "";
     private Boolean availableAws = false;
     private Boolean availableMicrosoft = false;
     private Boolean availableAzure = false;
@@ -50,7 +53,8 @@ public class SetupViewModel extends AndroidViewModel {
 
     public enum TranslateEngine{
         ON_DEVICE,
-        USING_API
+        USING_API,
+        USING_MS
     }
 
     public enum OCREngine{
@@ -65,6 +69,7 @@ public class SetupViewModel extends AndroidViewModel {
         ocrLiveData.setValue(OCREngine.ON_DEVICE);
         saveCodeLiveData.setValue(0);
         pageIndexLiveData.setValue(0);
+        countPage.setValue(0);
 
         gApiTranslate = GApiTranslate.getInstance();
         gTranslate = GTranslate.getInstance();
@@ -80,6 +85,23 @@ public class SetupViewModel extends AndroidViewModel {
 //    public GRecognition getGRecognition() {
 //        return gRecognition;
 //    }
+
+
+    public String getAzureHost() {
+        return azureHost;
+    }
+
+    public String getAzureKey() {
+        return azureKey;
+    }
+
+    public void setAzureHost(String azureHost) {
+        this.azureHost = azureHost;
+    }
+
+    public void setAzureKey(String azureKey) {
+        this.azureKey = azureKey;
+    }
 
     public MSRecognition getMsRecognition() {
         return msRecognition;
@@ -131,6 +153,10 @@ public class SetupViewModel extends AndroidViewModel {
 
     public MutableLiveData<Integer> getFlagToLiveData() {
         return flagToLiveData;
+    }
+
+    public MutableLiveData<Integer> getCountPage() {
+        return countPage;
     }
 
     public Boolean getAvailableAzure() {

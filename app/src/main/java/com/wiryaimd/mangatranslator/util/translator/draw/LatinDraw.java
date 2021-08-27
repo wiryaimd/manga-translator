@@ -25,7 +25,13 @@ public class LatinDraw {
 
     private MergeBlockModel textBlock;
 
-    public LatinDraw(){
+    private float bitmapH;
+
+    public LatinDraw(int bitmapH){
+        Log.d(TAG, "LatinDraw: bitmapH: " + bitmapH);
+        this.bitmapH = (float)(bitmapH * 0.15);
+
+        Log.d(TAG, "LatinDraw: bitmap height resized: " + this.bitmapH);
 
         paintBg = new Paint();
 
@@ -35,11 +41,13 @@ public class LatinDraw {
         paintText = new Paint();
         paintText.setTypeface(Typeface.DEFAULT_BOLD);
         paintText.setColor(Color.BLACK);
+        paintText.setAntiAlias(true);
 
         paintStroke = new Paint();
         paintStroke.setTypeface(Typeface.DEFAULT_BOLD);
         paintStroke.setStyle(Paint.Style.STROKE);
         paintStroke.setColor(Color.WHITE);
+        paintStroke.setAntiAlias(true);
 
     }
 
@@ -110,12 +118,20 @@ public class LatinDraw {
 //        if (translated.length() > original.length()){
         if (isJapan){
             resize = (float)(avgWidth - (avgWidth * 0.20));
-            paintText.setTextSize(resize);
-            Log.d(TAG, "drawTranslated: avg widthja: " + avgWidth);
             Log.d(TAG, "drawTranslated: resize size: " + resize);
+            Log.d(TAG, "drawTranslated: avg widthja: " + avgWidth);
+            if (resize < bitmapH) {
+                paintText.setTextSize(resize);
+                paintStroke.setTextSize(resize);
+                paintStroke.setStrokeWidth((float) (resize * 0.04));
+            }
         }else {
-            paintText.setTextSize(avgHeight);
-//            paintStroke.setTextSize(avgHeight);
+            Log.d(TAG, "drawTranslated: avgheight: " + avgHeight);
+            if (avgHeight < bitmapH) {
+                paintText.setTextSize(avgHeight);
+                paintStroke.setTextSize(avgHeight);
+                paintStroke.setStrokeWidth((float) (avgHeight * 0.04));
+            }
         }
 //        }else{
 //            paintText.setTextSize((float)(avgHeight + (avgHeight * 0.20)));
@@ -123,7 +139,6 @@ public class LatinDraw {
 //        }
 
 //        float avgStroke = (float)(avgHeight * 0.02);
-//        paintStroke.setStrokeWidth(avgStroke);
 
         StringBuilder sb = new StringBuilder();
         String[] res = translated.split("\\s+|\\n");
@@ -156,9 +171,11 @@ public class LatinDraw {
 //                float textY = widthJapan / avgHeight;
                 widthMidY += avgWidth;
                 canvas.drawText(draw.toUpperCase(), textMid, widthMidY, paintText);
+                canvas.drawText(draw.toUpperCase(), textMid, widthMidY, paintStroke);
             }else{
                 heightMid += avgHeight;
                 canvas.drawText(draw.toUpperCase(), textMid, heightMid, paintText);
+                canvas.drawText(draw.toUpperCase(), textMid, heightMid, paintStroke);
             }
         }
         Log.d(TAG, "drawTranslated: drawed brohh");

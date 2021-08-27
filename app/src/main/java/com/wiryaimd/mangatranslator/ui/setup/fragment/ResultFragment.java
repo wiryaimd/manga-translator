@@ -1,11 +1,14 @@
 package com.wiryaimd.mangatranslator.ui.setup.fragment;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,14 +19,17 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.wiryaimd.mangatranslator.BaseApplication;
 import com.wiryaimd.mangatranslator.R;
 import com.wiryaimd.mangatranslator.ui.main.MainActivity;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.adapter.ResultAdapter;
 import com.wiryaimd.mangatranslator.ui.setup.SetupViewModel;
 import com.wiryaimd.mangatranslator.ui.setup.fragment.dialog.SelectSaveDialog;
+import com.wiryaimd.mangatranslator.util.Const;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,15 +43,19 @@ public class ResultFragment extends Fragment {
 
     private SetupViewModel setupViewModel;
 
-    private RecyclerView recyclerView;
+    private ViewPager2 viewPager;
     private TextView tvinfo;
 
     private ExtendedFloatingActionButton fabSave;
 
     private ArrayList<Bitmap> bitmapList;
 
+    private ImageView imgprev, imgnext;
+
     private Timer timer;
-    private int count = 2;
+    private int count = 1;
+
+    private int countPage = 0;
 
     @Nullable
     @org.jetbrains.annotations.Nullable
@@ -61,18 +71,29 @@ public class ResultFragment extends Fragment {
 
         tvinfo = view.findViewById(R.id.result_tvinfo);
         fabSave = view.findViewById(R.id.result_fabsave);
-        recyclerView = view.findViewById(R.id.result_recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(setupViewModel.getApplication()));
+        viewPager = view.findViewById(R.id.result_viewpager);
+        imgprev = view.findViewById(R.id.result_prev);
+        imgnext = view.findViewById(R.id.result_next);
 
         bitmapList = setupViewModel.getBitmapListLiveData().getValue();
         if (bitmapList == null || bitmapList.size() == 0){
             requireActivity().finish();
-            Toast.makeText(setupViewModel.getApplication(), "Cannot load bitmap data", Toast.LENGTH_LONG).show();
+            Toast.makeText(setupViewModel.getApplication(), "Cannot load bitmap data, select another image", Toast.LENGTH_LONG).show();
             return;
         }
 
+        BaseApplication baseApplication = setupViewModel.getApplication();
+
+        if (setupViewModel.getTeLiveData().getValue() == SetupViewModel.TranslateEngine.USING_MS) {
+            baseApplication.saveTlMS(bitmapList.size());
+        }else{
+            baseApplication.saveTl(bitmapList.size());
+        }
+
+        viewPager.setUserInputEnabled(false);
+
         ResultAdapter adapter = new ResultAdapter(setupViewModel.getApplication());
-        recyclerView.setAdapter(adapter);
+        viewPager.setAdapter(adapter);
         adapter.setBitmapList(bitmapList);
 
         timer = new Timer();
@@ -95,10 +116,49 @@ public class ResultFragment extends Fragment {
                     tvinfo.setVisibility(View.GONE);
                     timer.cancel();
 
-                    if (MainActivity.interstitialAd.isReady()){
-//                        MainActivity.interstitialAd.showAd();
+                    if (!baseApplication.isSubscribe()) {
+                        if (MainActivity.interstitialAd.isReady()) {
+                            MainActivity.interstitialAd.showAd();
+                        }
                     }
                 }
+            }
+        });
+
+        setupViewModel.getCountPage().setValue(0);
+
+        setupViewModel.getCountPage().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                if (integer == bitmapList.size() - 1){
+                    imgnext.setVisibility(View.GONE);
+                }else{
+                    imgnext.setVisibility(View.VISIBLE);
+                }
+
+                if (integer == 0){
+                    imgprev.setVisibility(View.GONE);
+                }else{
+                    imgprev.setVisibility(View.VISIBLE);
+                }
+
+                viewPager.setCurrentItem(integer);
+            }
+        });
+
+        imgprev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                countPage -= 1;
+                setupViewModel.getCountPage().setValue(countPage);
+            }
+        });
+
+        imgnext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                countPage += 1;
+                setupViewModel.getCountPage().setValue(countPage);
             }
         });
 
