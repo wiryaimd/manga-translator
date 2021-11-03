@@ -4,7 +4,6 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.wiryaimd.mangatranslator.api.ApiEndpoint;
 import com.wiryaimd.mangatranslator.api.model.DetectModel;
 import com.wiryaimd.mangatranslator.model.merge.MergeBlockModel;
 import com.wiryaimd.mangatranslator.model.merge.MergeLineModel;

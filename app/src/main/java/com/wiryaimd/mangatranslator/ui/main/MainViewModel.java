@@ -5,10 +5,6 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
-import com.wiryaimd.mangatranslator.util.storage.CStorage;
-import com.wiryaimd.mangatranslator.util.vision.MSRecognition;
-import com.wiryaimd.mangatranslator.api.ApiEndpoint;
-
 public class MainViewModel extends AndroidViewModel {
 
     public interface OpenFile{

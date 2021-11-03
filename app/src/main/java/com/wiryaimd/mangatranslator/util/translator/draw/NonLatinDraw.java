@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 
 import com.wiryaimd.mangatranslator.model.merge.MergeBlockModel;
 
+// this class do nothing
 public class NonLatinDraw {
 
     private Paint paintBg, paintText, paintStroke;
