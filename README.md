@@ -26,4 +26,10 @@ Will draw and paste translated text to your requested image
 - Some confused function from my code
 
 #
+
+### Preview Image
+![preview1](preview1.jpg)
+![preview2](preview2.jpg)
+
+#
 Lets start to contributes in my shitty project, maybe a ton of bugs and more features can be solved with this
