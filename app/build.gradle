@@ -11,7 +11,7 @@ android {
         applicationId "com.wiryaimd.mangatranslator"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 4
+        versionCode 10
         versionName "1.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -83,9 +83,6 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
 
-    // aws translate
-//    implementation 'com.amazonaws:aws-android-sdk-translate:2.6.20'
-
     // apache logging
     implementation 'commons-logging:commons-logging-api:1.1'
 
@@ -94,4 +91,7 @@ dependencies {
 
     // paypal sdk
     implementation 'com.paypal.sdk:paypal-android-sdk:2.16.0'
+
+    // admob ads
+    implementation 'com.google.android.gms:play-services-ads:20.3.0'
 }

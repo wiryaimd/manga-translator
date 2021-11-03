@@ -26,18 +26,18 @@
 
     </ImageView>
 
-    <ImageView
-        android:id="@+id/selectf_imgprem"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
-        android:layout_toEndOf="@id/selectf_select"
-        android:layout_marginStart="-72dp"
-        android:layout_marginBottom="-72dp"
-        android:layout_above="@id/selectf_select"
-        android:rotation="30"
-        android:src="@drawable/prem_ic">
+<!--    <ImageView-->
+<!--        android:id="@+id/selectf_imgprem"-->
+<!--        android:layout_width="90dp"-->
+<!--        android:layout_height="90dp"-->
+<!--        android:layout_toEndOf="@id/selectf_select"-->
+<!--        android:layout_marginStart="-72dp"-->
+<!--        android:layout_marginBottom="-72dp"-->
+<!--        android:layout_above="@id/selectf_select"-->
+<!--        android:rotation="30"-->
+<!--        android:src="@drawable/prem_ic">-->
 
-    </ImageView>
+<!--    </ImageView>-->
 
 
     <Button

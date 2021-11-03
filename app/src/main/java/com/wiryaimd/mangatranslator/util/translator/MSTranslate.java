@@ -42,19 +42,20 @@ public class MSTranslate {
     public void translateText(String text, String langFrom, String langTo, String key, String host, MSTranslate.Listener listener){
         RequestBody body = RequestBody.create("[{\"Text\": \"" + text.replace("\\", "") + "\"}]", mediaType);
 
-        HttpUrl url = new HttpUrl.Builder()
-                .scheme("https")
-                .host("api.cognitive.microsofttranslator.com")
-                .addPathSegment("/translate")
-                .addQueryParameter("api-version", "3.0")
-                .addQueryParameter("from", langFrom)
-                .addQueryParameter("to", langTo)
-                .build();
+//        HttpUrl url = new HttpUrl.Builder()
+//                .scheme("https")
+//                .host("microsoft-translator-text.p.rapidapi.com")
+//                .addPathSegment("/translate")
+//                .addQueryParameter("api-version", "3.0")
+//                .addQueryParameter("to", langTo)
+//                .addQueryParameter("from", langFrom)
+//                .addQueryParameter("textType", "plain")
+//                .build();
 
-        Request request = new Request.Builder().url(url).post(body)
-                .addHeader("Ocp-Apim-Subscription-Key", key)
-                .addHeader("Ocp-Apim-Subscription-Region", "eastus")
+        Request request = new Request.Builder().url("https://microsoft-translator-text.p.rapidapi.com/translate?api-version=3.0&from=" + langFrom + "&to=" + langTo + "&textType=plain").post(body)
                 .addHeader("Content-type", "application/json")
+                .addHeader("x-rapidapi-host", "microsoft-translator-text.p.rapidapi.com")
+                .addHeader("x-rapidapi-key", key)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -82,7 +83,7 @@ public class MSTranslate {
                 StringBuilder sb = new StringBuilder();
                 for(TranslateModel tlModel : translateList){
                     for (TranslateModel.Translation translation : tlModel.getTranslations()){
-                        Log.d(TAG, "onResponse: translation azure: " + translation.getText());
+                        Log.d(TAG, "onResponse: translation mstl: " + translation.getText());
                         sb.append(translation.getText()).append(" ");
                     }
                 }

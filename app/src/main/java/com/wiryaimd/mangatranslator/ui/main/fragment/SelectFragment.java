@@ -41,7 +41,7 @@ public class SelectFragment extends Fragment {
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         btnselect = view.findViewById(R.id.selectf_btnselect);
-        imgprem = view.findViewById(R.id.selectf_imgprem);
+//        imgprem = view.findViewById(R.id.selectf_imgprem);
 
         btnselect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,12 +57,12 @@ public class SelectFragment extends Fragment {
             }
         });
 
-        imgprem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                requireActivity().startActivity(new Intent(requireActivity(), PremiumActivity.class));
-            }
-        });
+//        imgprem.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                requireActivity().startActivity(new Intent(requireActivity(), PremiumActivity.class));
+//            }
+//        });
 
     }
 }

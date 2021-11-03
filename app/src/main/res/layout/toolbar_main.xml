@@ -12,7 +12,6 @@
         android:layout_height="?attr/actionBarSize"
         app:subtitleTextColor="@color/color6"
         app:title="Manga Translator"
-        app:navigationIcon="@drawable/ic_premium"
         app:titleTextColor="@color/white">
 
     </androidx.appcompat.widget.Toolbar>

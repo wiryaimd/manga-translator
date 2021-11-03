@@ -117,8 +117,13 @@ public class ResultFragment extends Fragment {
                     timer.cancel();
 
                     if (!baseApplication.isSubscribe()) {
-                        if (MainActivity.interstitialAd.isReady()) {
-                            MainActivity.interstitialAd.showAd();
+                        if (baseApplication.getInterstitialAd().isReady() && baseApplication.getCountAds() == 0) {
+                            Log.d(TAG, "onChanged: ads ready: ");
+                            baseApplication.getInterstitialAd().showAd();
+                        }else{
+                            if (baseApplication.getInterstitialAdAdmob() != null){
+                                baseApplication.getInterstitialAdAdmob().show(requireActivity());
+                            }
                         }
                     }
                 }

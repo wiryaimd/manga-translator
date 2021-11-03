@@ -55,22 +55,6 @@ public class SetupActivity extends AppCompatActivity {
 
         dbref = FirebaseDatabase.getInstance().getReference().child("mangaTranslator");
 
-        dbref.child("availableAws").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                Boolean isAvailable = snapshot.getValue(Boolean.class);
-
-                Log.d(TAG, "onDataChange: availableAws: " + isAvailable);
-
-                setupViewModel.setAvailableAws(true);
-            }
-
-            @Override
-            public void onCancelled(@NonNull @NotNull DatabaseError error) {
-
-            }
-        });
-
         dbref.child("availableMicrosoft").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {

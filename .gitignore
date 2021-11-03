@@ -7,7 +7,12 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+gradle/
+
 app/debug/
+/*/src/androidTest
+/*/src/test
+
 .idea/
 build/
 bin/

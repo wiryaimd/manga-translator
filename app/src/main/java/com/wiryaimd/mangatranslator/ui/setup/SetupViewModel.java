@@ -41,7 +41,6 @@ public class SetupViewModel extends AndroidViewModel {
     private String rapidHost = Const.RAPID_API_HOST;
     private String azureHost = "";
     private String azureKey = "";
-    private Boolean availableAws = false;
     private Boolean availableMicrosoft = false;
     private Boolean availableAzure = false;
 
@@ -163,10 +162,6 @@ public class SetupViewModel extends AndroidViewModel {
         return availableAzure;
     }
 
-    public Boolean getAvailableAws() {
-        return availableAws;
-    }
-
     public Boolean getAvailableMicrosoft() {
         return availableMicrosoft;
     }
@@ -185,10 +180,6 @@ public class SetupViewModel extends AndroidViewModel {
 
     public void setRapidKey(String rapidKey) {
         this.rapidKey = rapidKey;
-    }
-
-    public void setAvailableAws(Boolean availableAws) {
-        this.availableAws = availableAws;
     }
 
     public void setAvailableMicrosoft(Boolean availableMicrosoft) {

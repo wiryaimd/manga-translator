@@ -270,7 +270,7 @@ public class ProcessDialog extends DialogFragment {
                         lang = "zh-Hans";
                     }
 
-                    msTranslate.translateText(mergeBlockModel.getText(), lang, LanguagesData.flag_id_to[flagTo], setupViewModel.getAzureKey(), setupViewModel.getAzureHost(), new MSTranslate.Listener() {
+                    msTranslate.translateText(mergeBlockModel.getText(), lang, LanguagesData.flag_id_to[flagTo], setupViewModel.getRapidKey(), setupViewModel.getAzureHost(), new MSTranslate.Listener() {
                         @Override
                         public void complete(String translated, String source) {
                             Log.d(TAG, "complete: latin ms translate");

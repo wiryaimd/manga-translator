@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Manga Translator</string>
-    <string name="ps_license">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi3Y7RGgGX4LsOABh3A7ULQhzLa2+n4X3q3YS3RxPQAOPZdUi8VbbNa13TLaD7BCK6OILOW0gqwNzE8FT3UCOnoXylZpeTWyaMa4lDW2XnTHDPkkD9rq2WypbcI9DhmMYfGpGPXerX5pY/wmo88XA2HjORAhrKeFA9NhDLUZMPclU5LW9Bd+3bf2VfdJs3WhkizIcAMF6AhmDngoUyZQpycRJbVDuisZpBF3bc4WhwJqjl6BY5JQMzoqx09Fzh08psiNhbVluZK1tHlThBzyJ0CrM7czsl/ZQ7s0CNg+fqlI6+vV+tiwvtfwK/jFvWUsei0ysl8z+0RmgCkl6EGyO/QIDAQAB</string>
     <string name="ads_id">099631f0613a4c92</string>
+    <string name="ads_id2">68be75577142c82e</string>
+
+    <string name="admob_test">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="admob_ads1">ca-app-pub-6296152785229762/5698789596</string>
 </resources>

@@ -18,6 +18,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
@@ -33,6 +34,9 @@ import com.applovin.mediation.MaxError;
 import com.applovin.mediation.ads.MaxInterstitialAd;
 import com.applovin.sdk.AppLovinSdk;
 import com.applovin.sdk.AppLovinSdkConfiguration;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -61,6 +65,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -73,8 +81,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvinfo;
 
     private Toolbar toolbar;
-
-    public static MaxInterstitialAd interstitialAd;
 
     private ActivityResultLauncher<String> launcherImg = registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), new ActivityResultCallback<List<Uri>>() {
         @Override
@@ -165,52 +171,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         mainViewModel = new ViewModelProvider(MainActivity.this).get(MainViewModel.class);
 
+        BaseApplication baseApplication = mainViewModel.getApplication();
+        baseApplication.initApplovin(MainActivity.this);
+
         FirebaseApp.initializeApp(MainActivity.this);
-
-        AppLovinSdk.getInstance(MainActivity.this).setMediationProvider("max");
-
-        interstitialAd = new MaxInterstitialAd(getString(R.string.ads_id), MainActivity.this);
-        interstitialAd.setListener(new MaxAdListener() {
-            @Override
-            public void onAdLoaded(MaxAd ad) {
-                Log.d(TAG, "onAdLoaded: ");
-            }
-
-            @Override
-            public void onAdDisplayed(MaxAd ad) {
-                Log.d(TAG, "onAdDisplayed: ");
-            }
-
-            @Override
-            public void onAdHidden(MaxAd ad) {
-                Log.d(TAG, "onAdHidden: ");
-                interstitialAd.loadAd();
-            }
-
-            @Override
-            public void onAdClicked(MaxAd ad) {
-                Log.d(TAG, "onAdClicked: ");
-            }
-
-            @Override
-            public void onAdLoadFailed(String adUnitId, MaxError error) {
-                Log.d(TAG, "onAdLoadFailed: ");
-            }
-
-            @Override
-            public void onAdDisplayFailed(MaxAd ad, MaxError error) {
-                Log.d(TAG, "onAdDisplayFailed: ");
-                interstitialAd.loadAd();
-            }
-        });
-
-        AppLovinSdk.initializeSdk(MainActivity.this, new AppLovinSdk.SdkInitializationListener() {
-            @Override
-            public void onSdkInitialized(AppLovinSdkConfiguration config) {
-                Log.d(TAG, "onSdkInitialized: init success");
-                interstitialAd.loadAd();
-            }
-        });
 
         MainViewModel.OpenFile openFile = new MainViewModel.OpenFile() {
             @Override
@@ -232,13 +196,12 @@ public class MainActivity extends AppCompatActivity {
             new InfoDialog("Connection Info", "Please check your connection before start translate", false).show(getSupportFragmentManager(), "CONNECTION_CHECK");
         }
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, PremiumActivity.class));
-            }
-        });
-
+//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                startActivity(new Intent(MainActivity.this, PremiumActivity.class));
+//            }
+//        });
 
         dbref = FirebaseDatabase.getInstance().getReference().child("mangaTranslator");
 
