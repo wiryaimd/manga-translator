@@ -1,7 +1,7 @@
 
 # **Manga-Translator**
 
-Get it on [PlayStore](https://play.google.com/store/apps/details?id=com.wiryaimd.mangatranslator)
+<a href='https://play.google.com/store/apps/details?id=com.wiryaimd.mangatranslator'><img alt='Get it on Google Play' height='80' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
 
 Website: https://www.mangatlx.my.to/
 
