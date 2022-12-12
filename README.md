@@ -7,7 +7,7 @@ Website: https://www.mangatlx.my.to/
 
 Fast translation up to 60+ languages. This app will atuomatically detect text in image, auto translate text and draw text automatically
 
-![main](thumb-mangatl.png)
+![main](gaujpeg.jpg)
 
 #
 
@@ -30,6 +30,7 @@ Will draw and paste translated text to your requested image
 #
 
 ### Preview Image
+![preview-0](b2022.png)
 ![preview](preview.png)
 
 #
