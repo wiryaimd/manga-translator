@@ -3,7 +3,7 @@
 
 <a href='https://play.google.com/store/apps/details?id=com.wiryaimd.mangatranslator'><img alt='Get it on Google Play' height='80' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
 
-Website: https://www.mangatlx.my.to/
+Website: [https://mangatlx.com/](https://mangatlx.com/)
 
 Fast translation up to 60+ languages. This app will atuomatically detect text in image, auto translate text and draw text automatically
 
